@@ -1,0 +1,46 @@
+.custom-radio {
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+
+  input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle {
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 18px;
+    border-radius: 10px;
+    background-color: #ccc;
+    transition: background-color 0.3s;
+
+    &:after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background-color: #fff;
+      transition: transform 0.3s, background-color 0.3s;
+    }
+  }
+
+  &.checked {
+    .toggle {
+      background-color: #4cd964;
+
+      &:after {
+        transform: translateX(20px);
+        background-color: #fff;
+      }
+    }
+  }
+}

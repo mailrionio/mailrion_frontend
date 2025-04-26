@@ -1,0 +1,289 @@
+.Organizations {
+  background: var(--background);
+  &__main {
+    padding: 40px 60px;
+    height: calc(100vh - 80px);
+    overflow: auto;
+    @media screen and (max-width: 758px) {
+      padding: 10px 20px;
+    }
+
+    .title {
+      color: #92929d;
+
+      line-height: 1.5;
+      letter-spacing: 0.1px;
+
+      h1 {
+        font-size: 32px;
+        margin-right: 5px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: normal;
+      }
+    }
+    .organizations-count {
+      display: flex;
+      margin-top: 40px;
+      justify-content: space-between;
+      // padding: 10px 0;
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      @media screen and (max-width: 758px) {
+        flex-direction: column;
+      }
+      .orgCount {
+        display: flex;
+        align-items: center;
+        h2 {
+          padding: 0;
+          margin: 0;
+          font-size: 24px;
+          font-style: normal;
+          font-weight: 600;
+          line-height: 60px;
+          letter-spacing: -0.48px;
+          margin-right: 10px;
+        }
+        span {
+          display: flex;
+          width: 17.813px;
+          height: 17.813px;
+          align-items: center;
+          border-radius: 50%;
+          flex-direction: column;
+          justify-content: center;
+          flex-shrink: 0;
+          color: var(--primary-color);
+          background-color: #fee7cc;
+          text-align: center;
+          font-size: 14.25px;
+          font-family: "Poppins";
+          font-style: normal;
+          font-weight: 500;
+          line-height: 35.625px;
+          letter-spacing: -0.285px;
+          -webkit-border-radius: 50%;
+          -moz-border-radius: 50%;
+          -ms-border-radius: 50%;
+          -o-border-radius: 50%;
+        }
+      }
+      .create-new {
+        display: flex;
+        align-items: center;
+        // justify-content: center;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        padding: 10px 16px;
+        margin-top: 10px;
+        height: 40px;
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
+        -ms-border-radius: 5px;
+        -o-border-radius: 5px;
+        .create {
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+        }
+        p {
+          /* Text sm/Medium */
+          font-size: 14px;
+          font-family: "Poppins";
+          font-style: normal;
+          font-weight: 500;
+          line-height: 20px;
+          margin: 0 1rem;
+        }
+        img {
+          display: flex;
+          padding: 10px 16px;
+          justify-content: center;
+          align-items: center;
+          gap: 8px;
+          border-left: 1px solid var(--border-color);
+        }
+        .active {
+          background-color: #ededed;
+        }
+      }
+    }
+    .manage {
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 20px;
+      margin-top: 1rem;
+    }
+    .orgs {
+      margin-top: 20px;
+
+      .create-cardbtnIcon {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        transition: all 0.3s ease-in-out;
+        height: 200px;
+        .icon {
+          width: 100%;
+          height: 80px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-bottom: 1px solid var(--border-color);
+        }
+        .newWrapper {
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          // background-color: var(--background);
+        }
+      }
+      .orgCard {
+        display: flex;
+        position: relative;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        .more-card {
+          right: 2.5rem;
+        }
+        &__header {
+          display: flex;
+          width: 100%;
+          padding: 10px 16px;
+
+          .org_logo {
+            align-items: center;
+            justify-content: center;
+            img {
+              margin-right: 1rem;
+              width: 40px;
+              height: 40px;
+              border-radius: 50%;
+              object-fit: cover;
+            }
+          }
+          .org_name_more {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            .org_name {
+              position: relative;
+              cursor: pointer;
+              .name {
+                display: flex;
+                p {
+                  font-size: 16px;
+                  font-family: "Poppins";
+                  font-style: normal;
+                  font-weight: 500;
+                  line-height: 20px;
+                  padding: 0;
+                  margin: 0;
+                }
+                img {
+                  margin-left: 5px;
+                }
+              }
+              span {
+                font-size: 14px;
+                font-family: "Poppins";
+                font-style: normal;
+                font-weight: 400;
+                line-height: 20px;
+              }
+            }
+            .more {
+              cursor: pointer;
+            }
+          }
+        }
+        &__content {
+          // margin: 1px 0 !important;
+          padding: 10px 16px;
+
+          display: flex;
+          // z-index: -1;
+          .add_member {
+            width: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            flex-shrink: 0;
+            border-radius: 40px;
+            border: 2px solid var(--border-color);
+            background: var(--background);
+            z-index: 2;
+            cursor: pointer;
+          }
+          .members {
+            margin-left: -10px;
+            z-index: 1;
+          }
+          .member_count {
+            width: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            flex-shrink: 0;
+            border-radius: 40px;
+            border: 2px solid var(--border-color);
+            background: var(--background);
+            z-index: -1.1;
+            margin-left: -10px;
+            color: var(--text-color);
+          }
+        }
+        &__footer {
+          border-top: 1px solid var(--border-color);
+          padding: 10px 16px;
+          p {
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 3.5px;
+            text-align: left;
+          }
+        }
+      }
+    }
+  }
+  .delete-org-dialog {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 3rem;
+    // background-color: var(--background);
+    &__content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      p {
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: 20px;
+        letter-spacing: -0.32px;
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+      h2 {
+        font-style: normal;
+        font-weight: 600;
+        line-height: 20px;
+        letter-spacing: -0.32px;
+        text-align: center;
+        margin-bottom: 1rem;
+        text-transform: capitalize;
+      }
+      &__btns {
+        margin-top: 1rem;
+        display: flex;
+      }
+    }
+  }
+}

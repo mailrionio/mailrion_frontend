@@ -1,0 +1,197 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+
+:root {
+  --primary-color: #fb8500;
+  --primary-color-hover: #d4770b;
+  --secondary-color: #023047;
+  --text-color: #5e5e5e;
+  --disabled-color: rgb(33, 33, 33);
+  --border-color: #eeeeee;
+  --background: #ffffffff;
+  --card-color: #f8f8f8;
+  --input-color: #dededf;
+}
+
+* {
+  font-family: "Montserrat", sans-serif;
+}
+
+/* Let's highlight canvas boundaries */
+#gjs {
+  border: none;
+  height: 100%;
+  padding: 0 !important;
+}
+
+.id0k {
+  box-shadow: 1px 2px 19px rgba(0, 0, 0, 0.3);
+}
+
+.gjs-one-bg {
+  background: #ffffff !important;
+}
+
+.gjs-two-color {
+  color: #666666;
+}
+
+.editorCanvas {
+  position: relative;
+  height: 90vh;
+
+  .loader {
+    background: transparent;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%);
+  }
+}
+
+.gjs-cv-canvas-bg {
+  background-image: url('data:image/svg+xml,%3csvg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"%3e%3cg clip-path="url%28%23clip0_2151_22127%29"%3e%3crect opacity="0.03" width="12" height="12" fill="black"/%3e%3crect opacity="0.03" y="12" width="12" height="12" fill="white"/%3e%3crect opacity="0.03" x="12" width="12" height="12" fill="white"/%3e%3crect opacity="0.03" x="12" y="12" width="12" height="12" fill="black"/%3e%3c/g%3e%3cdefs%3e%3cclipPath id="clip0_2151_22127"%3e%3crect width="24" height="24" fill="white"/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e');
+}
+
+/* Reset some default styling */
+.gjs-cv-canvas {
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.panelTop {
+  padding: 1rem;
+  width: 100%;
+  height: 10vh;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgb(255, 255, 255);
+  color: #666666;
+  border-bottom: 1px solid var(--input-color);
+  position: relative;
+  z-index: 1000;
+
+  .logoContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .logo {
+      border-right: 1px solid #bdbdbd;
+      padding-right: 1rem;
+
+      .logoLink {
+        display: flex;
+        margin-left: 1rem;
+
+        img {
+          width: 120px;
+        }
+      }
+    }
+
+    .back {
+      cursor: pointer;
+      display: flex;
+      width: fit-content;
+      gap: 2px;
+      margin-left: 15px;
+      align-items: center;
+    }
+
+    .back:hover {
+      svg {
+        transform: translateX(-5px) !important;
+      }
+    }
+  }
+}
+
+.panelAction {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.panelAction .MuiButton-containedPrimary {
+  color: #000;
+  background: #3f51b500;
+  border: 1px solid black;
+}
+
+.panelTop .gjs-pn-buttons span {
+  border-radius: 10px;
+  color: var(--text-color);
+}
+
+.panelTop .gjs-pn-buttons span:hover {
+  background: #e6e6e6;
+}
+
+.gjs-off-prv {
+  color: white !important;
+}
+
+.btn {
+  padding: 8px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  color: white;
+  transition: 500ms;
+  font-family: Montserrat;
+}
+
+.btn-primary-outline {
+  border: 1px solid var(--text-color);
+  color: var(--text-color);
+  transition: 500ms;
+  font-family: Montserrat;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-color-hover);
+  border: 1px solid var(--primary-color-hover);
+}
+
+.btn-primary-outline:hover {
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+}
+
+.desktopWindow {
+  content: url("/editor/icons/screen.svg");
+  border-radius: 8px;
+}
+
+.mobilewindow {
+  content: url("/editor/icons/smartphone.svg");
+  border-radius: 8px;
+}
+
+.mobilewindow:hover {
+  background: #edeff0;
+}
+
+.mobilewindow:active {
+  background: #e0e0e0;
+}
+
+.tabWindow {
+  content: url("/editor/icons/tab.svg");
+  border-radius: 8px;
+}
+
+.tabWindow:hover {
+  background: #edeff0;
+}
+
+.tabWindow:active {
+  background: #e0e0e0;
+}

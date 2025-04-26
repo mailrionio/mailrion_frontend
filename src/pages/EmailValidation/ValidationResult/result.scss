@@ -1,0 +1,89 @@
+.table-container {
+  .header {
+    padding: 10px 16px;
+    h1 {
+      font-size: 25px;
+      font-weight: 600;
+      color: var(--text-color);
+      margin: 0;
+    }
+  }
+  padding: 10px 16px;
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    border: 1px solid var(--border-color);
+    thead {
+      th {
+        font-weight: 500;
+        font-size: 16px;
+        border-bottom: 1px solid var(--border-color);
+      }
+    }
+    tbody {
+      td {
+        font-size: 14px;
+      }
+      .result-clean {
+        color: #04972d !important;
+      }
+      .result-bad {
+        color: #ff0000 !important;
+      }
+    }
+    th {
+      padding: 12px 24px;
+      font-size: 12px;
+    }
+    td {
+      // height: 72px;
+      padding: 16px 24px;
+    }
+    th,
+    td {
+      // border-bottom: 1px solid var(--border-color);
+      text-align: left;
+      color: var(--text-color);
+      color: var(--secondary-color);
+      border-right: 1px solid var(--border-color);
+      font-style: normal;
+      font-weight: 500;
+      line-height: 18px; /* 150% */
+      letter-spacing: 0.01em;
+    }
+
+    .result-id {
+      color: var(--secondary-color);
+    }
+
+    .result-filename {
+      gap: 5px;
+      font-size: 13px;
+    }
+
+    th {
+      background-color: var(--background);
+    }
+
+    tr:nth-child(odd) {
+      background-color: var(--card-color);
+      // background-color: var(--background);
+    }
+
+    tr:nth-child(even) {
+    }
+
+    .icon {
+      margin-right: 5px;
+    }
+
+    .action-icons {
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}

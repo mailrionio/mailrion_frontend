@@ -1,0 +1,811 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+
+:root {
+  --primary-color: #fb8500;
+  --primary-color-hover: #d4770b;
+  --secondary-color: #023047;
+  --text-color: #5e5e5e;
+  --disabled-color: rgb(33, 33, 33);
+  --border-color: #eeeeee;
+  --background: #ffffffff;
+  --card-color: #f8f8f8;
+  --input-color: #dededf;
+}
+
+* {
+  font-family: "Montserrat", sans-serif;
+}
+
+/* Let's highlight canvas boundaries */
+#gjs {
+  padding: 0.5rem;
+  border: none;
+  height: 100%;
+}
+
+.id0k {
+  box-shadow: 1px 2px 19px rgba(0, 0, 0, 0.3);
+}
+
+.gjs-rte-actionbar {
+  background: #666666;
+  border: none;
+  box-shadow: 1px 2px solid black;
+}
+
+.fixed-rte-toolbar {
+  left: 50% !important;
+  position: absolute !important;
+  transform: translateX(-50%) !important;
+}
+
+.gjs-rte-action {
+  color: white;
+}
+
+.gjs-rte-action i,
+.gjs-rte-action b,
+.gjs-rte-action u,
+.gjs-rte-action s,
+.gjs-rte-action svg {
+  color: white;
+}
+
+.editor-canvas {
+  flex-grow: 1;
+
+  .loader {
+    background: transparent;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%);
+  }
+}
+
+.gjs-cv-canvas-bg {
+  background-image: url('data:image/svg+xml,%3csvg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"%3e%3cg clip-path="url%28%23clip0_2151_22127%29"%3e%3crect opacity="0.03" width="12" height="12" fill="black"/%3e%3crect opacity="0.03" y="12" width="12" height="12" fill="white"/%3e%3crect opacity="0.03" x="12" width="12" height="12" fill="white"/%3e%3crect opacity="0.03" x="12" y="12" width="12" height="12" fill="black"/%3e%3c/g%3e%3cdefs%3e%3cclipPath id="clip0_2151_22127"%3e%3crect width="24" height="24" fill="white"/%3e%3c/clipPath%3e%3c/defs%3e%3c/svg%3e');
+}
+
+// CodeViewer Styling
+.cm-s-hopscotch .CodeMirror-linenumber {
+  color: white !important;
+}
+
+.CodeMirror-gutter {
+  width: 0;
+}
+
+#gjs-cm-title {
+  color: #023047 !important;
+  font-weight: 500 !important;
+}
+
+.cm-s-hopscotch.CodeMirror {
+  color: white !important;
+}
+
+.CodeMirror-wrap pre.CodeMirror-line,
+.CodeMirror-wrap pre.CodeMirror-line-like {
+  padding-left: 3rem;
+}
+
+.CodeMirror-sizer {
+  margin-left: 0;
+}
+
+.CodeMirror-vscrollbar,
+.CodeMirror-hscrollbar,
+.CodeMirror-scrollbar-filler,
+.CodeMirror-gutter-filler {
+  scroll-behavior: smooth;
+}
+// End CodeViewer >>>>>>>>>
+
+// Rich Text Editor Styling
+.gjs-rte-actionbar {
+  // position: absolute;
+  // left: 50%;
+  // top: 24px;
+  width: 20rem;
+  // transform: translateX(-50%);
+}
+
+.gjs-field input {
+  color: #23336a !important;
+}
+
+.gjs-field-integer input {
+  padding-right: 30px;
+  max-height: 28px;
+}
+
+.gjs-field input,
+.gjs-field select,
+.gjs-field textarea {
+  max-height: 28px;
+}
+
+/* Reset some default styling */
+.gjs-cv-canvas {
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.gjs-editor-sp .sp-palette-container,
+.gjs-editor-sp .sp-picker-container {
+  background: white;
+}
+
+.panel__top {
+  padding: 1rem;
+  width: 100%;
+  height: 10vh;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgb(255, 255, 255);
+  color: #666666;
+  border-bottom: 1px solid var(--input-color);
+  /* box-shadow: 0px 12px 10px -15px #bdbdbd; */
+  position: relative;
+  z-index: 1000;
+  /* border-bottom: 1px solid #666666; */
+}
+.gjs-two-color {
+  color: #666666;
+}
+.gjs-one-bg {
+  background: #ffffff00;
+}
+.panel__top .gjs-pn-buttons span {
+  border-radius: 10px;
+  color: var(--text-color);
+}
+.panel__top .gjs-pn-buttons span:hover {
+  background: #e6e6e6;
+}
+.panel__basic-actions {
+  position: initial;
+}
+
+.gjs-pn-panel {
+  position: static;
+}
+
+.editor-row {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  height: 90vh;
+}
+
+.panel__right {
+  width: 20%;
+  position: relative;
+  background: white !important;
+  border-left: 1px solid var(--input-color);
+  animation: slideRight 500ms forwards;
+}
+
+.panel__right.exit {
+  animation: slideRightExit 500ms forwards;
+}
+
+.manager {
+  display: flex;
+  margin: 10px auto 5px auto;
+  justify-content: space-between;
+}
+
+.manager span {
+  text-align: center;
+  padding: 5px 0;
+  width: 100%;
+  font-size: small;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.manager span:first-child {
+  border-right: 1px solid transparent;
+}
+
+.manager span:nth-child(2) {
+  border-left: 1px solid transparent;
+}
+
+.manager span:hover {
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid transparent;
+}
+
+.manager span.active {
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid transparent;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.content {
+  max-height: calc(90vh - 80px);
+  overflow-y: scroll;
+}
+
+.content::-webkit-scrollbar {
+  display: none;
+}
+
+.panel__switcher {
+  position: initial;
+}
+
+.page_title {
+  margin: 7px 0 -2px 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.blocks-wrapper {
+  width: 18%;
+  position: relative;
+  animation: slideLeft 500ms forwards;
+  border-right: 1px solid var(--input-color);
+}
+
+.blocks-wrapper.exit {
+  animation: slideLeftExit 500ms forwards;
+}
+
+.blocks-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.overlay-arrowleft-btn {
+  position: absolute;
+  top: 5px;
+  left: 0;
+  display: flex;
+  justify-content: end;
+  cursor: pointer;
+  background: #9d9d9dab;
+  z-index: 10;
+  padding: 4px 0;
+  border-top-right-radius: 25px;
+  border-bottom-right-radius: 25px;
+  transition: all 0.1s linear;
+}
+
+.overlay-arrowright-btn {
+  position: absolute;
+  top: 5px;
+  right: 0;
+  display: flex;
+  justify-content: end;
+  cursor: pointer;
+  background: #9d9d9dab;
+  z-index: 10;
+  padding: 4px 0;
+  border-top-left-radius: 25px;
+  border-bottom-left-radius: 25px;
+  transition: all 0.1s linear;
+}
+
+.overlay-arrowleft-btn:hover {
+  padding-left: 10px;
+  background: #3e3d3d;
+}
+
+.overlay-arrowright-btn:hover {
+  padding-right: 10px;
+  background: #3e3d3d;
+}
+
+.overlay-arrowleft-btn svg,
+.overlay-arrowright-btn svg {
+  color: rgba(255, 255, 255, 0.908);
+}
+
+.close-btn-left {
+  display: flex;
+  justify-content: end;
+  margin: 3px;
+  cursor: pointer;
+}
+
+.close-btn-right {
+  display: flex;
+  margin: 3px;
+  cursor: pointer;
+}
+
+.close-btn-left svg,
+.close-btn-right svg {
+  color: rgba(0, 0, 0, 0.5);
+  transition: all linear;
+}
+
+.close-btn-left svg:hover,
+.close-btn-right svg:hover {
+  color: rgba(0, 0, 0, 0.9);
+}
+
+#blocks {
+  overflow-y: scroll;
+  height: 95%;
+  padding: 2px 13px;
+  z-index: 100;
+  border-radius: 4px;
+}
+
+div#blocks::-webkit-scrollbar {
+  display: none;
+}
+
+.gjs-block-label img {
+  width: 100%;
+}
+
+.gjs-block {
+  min-width: 45%;
+  /* box-shadow: 0px 0px 10px -3px #bdbdbd !important; */
+  border: none;
+}
+
+.gjs-mdl-dialog {
+  margin-top: 5rem;
+  background: white;
+  box-shadow: 0px 0px 10px -3px #bdbdbd !important;
+}
+
+.gjs-mdl-header {
+  border: none;
+}
+
+.gjs-am-assets-cont {
+  background: white;
+}
+
+.gjs-am-meta {
+  font-weight: 500;
+}
+
+.gjs-mdl-title {
+  font-weight: 600;
+}
+
+.gjs-am-file-uploader,
+.gjs-am-assets-cont {
+  border: white;
+}
+
+.gjs-btn-prim {
+  background: var(--primary-color) !important;
+  color: white;
+  border-radius: 5px;
+  font-family: Montserrat;
+}
+
+// Hide one of the export to ZIP button on the view code Modal
+#gjs-mdl-c button:last-child {
+  display: none;
+}
+
+.gjs-btn-prim:hover {
+  background: var(--primary-color-hover) !important;
+}
+
+.gjs-am-add-asset button {
+  width: auto !important;
+  background-color: #367bee;
+  color: white !important;
+}
+
+.gjs-title {
+  background: white !important;
+  padding: 16px 10px 16px 20px !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid var(--input-color) !important;
+}
+
+.gjs-three-bg {
+  background: white;
+}
+
+.close-icon {
+  padding: 0.5rem;
+}
+
+.panel-action {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+
+  .saving {
+    display: flex;
+    position: absolute;
+    left: -6.5rem;
+    align-items: center;
+    gap: 5px;
+    font-size: small;
+  }
+
+  .error {
+    display: flex;
+    position: absolute;
+    left: -6.5rem;
+    align-items: center;
+    color: #e53045;
+    gap: 5px;
+    font-size: small;
+  }
+}
+
+.panel-action .MuiButton-containedPrimary {
+  color: #000;
+  background: #3f51b500;
+  border: 1px solid black;
+}
+
+.gjs-sm-title {
+  font-weight: 600 !important;
+  background: rgb(255, 255, 255) !important;
+  border-bottom: 2px solid #eef3f5 !important;
+}
+
+.gjs-layer-title {
+  border-bottom: 2px solid #eef3f5 !important;
+}
+
+.gjs-clm-tags #gjs-clm-tags-field {
+  background: var(--input-color);
+}
+.gjs-field {
+  background: var(--input-color);
+}
+.gjs-blocks-c {
+  padding: 0.5rem;
+}
+
+.gjs-am-file-uploader {
+  width: 50%;
+}
+.gjs-am-assets-cont {
+  width: 50%;
+  height: 304px;
+}
+.gjs-am-assets-header form {
+  display: flex;
+  justify-content: space-between;
+}
+
+.styles-container {
+  background: white;
+  padding: 0 10px !important;
+}
+
+.btn {
+  padding: 8px 28px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  color: white;
+  transition: 500ms;
+  font-family: Montserrat;
+}
+
+.btn-primary:disabled {
+  background: var(--input-color);
+  border: 1px solid var(--input-color);
+  cursor: not-allowed;
+}
+
+.btn-primary:disabled:hover {
+  background: var(--input-color);
+  border: 1px solid var(--input-color);
+}
+
+.btn-primary-outline {
+  border: 1px solid var(--text-color);
+  color: var(--text-color);
+  transition: 500ms;
+  font-family: Montserrat;
+}
+
+.btn-primary-outline:disabled {
+  border: 1px solid var(--input-color);
+  color: var(--input-color);
+  cursor: not-allowed;
+}
+
+.btn-primary-outline:disabled:hover {
+  border: 1px solid var(--input-color);
+  color: var(--input-color);
+  cursor: not-allowed;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-color-hover);
+  border: 1px solid var(--primary-color-hover);
+}
+
+.btn-primary-outline:hover {
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+}
+
+.panel__switcher {
+  display: flex;
+  align-items: center;
+}
+
+.go_back {
+  margin-right: 2rem;
+  cursor: pointer;
+}
+
+/* LAYERS CONTAINER */
+.layers-container {
+  padding: 0 8px;
+  margin-top: 4px;
+}
+
+.gjs-layer-count {
+  font-weight: 600;
+}
+
+.gjs-layer-title-c .gjs-layer-title {
+  border: none !important;
+}
+
+// EMAIL CONTAINER
+.emails-container {
+  width: 90%;
+  margin: 4px auto;
+
+  .div {
+    margin-top: 1rem;
+
+    label {
+      font-family: "Montserrat";
+    }
+
+    input {
+      width: 100%;
+      margin-top: 2px;
+      border-bottom: 1px solid #cdcccc;
+      font-family: "Montserrat";
+    }
+
+    input::placeholder {
+      font-style: normal;
+      color: var(--input-color);
+    }
+
+    input:hover {
+      border-bottom: 1px solid #8b8b8b;
+    }
+
+    input:focus {
+      border-bottom: 1px solid #fb8500;
+    }
+  }
+
+  .send-email {
+    margin-top: 1rem;
+
+    .btnLoad {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 2.5rem;
+
+      div {
+        margin-top: -0;
+      } 
+    }
+
+    .btnSend {
+      height: 2.5rem;
+    }
+  }
+}
+
+/* TRAITS */
+#traits-container {
+  margin-top: 2rem;
+}
+
+/* STYLE MANAGER */
+.gjs-sm-sector-title {
+  background: white;
+  border-bottom: 1px solid var(--input-color) !important;
+}
+
+.gjs-sm-sector-label {
+  font-family: Montserrat !important;
+  font-size: small;
+  font-weight: 600;
+}
+
+.gjs-sm-properties {
+  background: white;
+  border: none;
+}
+
+.gjs-field {
+  background: var(--input-color);
+}
+
+.gjs-field input,
+.gjs-sm-properties input,
+.gjs-sm-properties select,
+.gjs-sm-properties .gjs-radio-items {
+  background: var(--input-color) !important;
+  font-family: Montserrat;
+  color: var(--text-color);
+  font-size: small;
+}
+
+.gjs-sm-properties input[type="radio"]:checked + label {
+  background: var(--primary-color) !important;
+  color: white;
+}
+
+.gjs-sm-properties input[type="radio"]:checked + label:hover {
+  background: var(--primary-color-hover) !important;
+}
+
+.gjs-sm-properties input[type="range"]::-webkit-slider-runnable-track {
+  background: var(--primary-color);
+  border-radius: 5px;
+}
+
+.gjs-sm-properties input[type="range"]:active::-webkit-slider-thumb {
+  background: black;
+}
+
+.gjs-field input::placeholder,
+.gjs-sm-properties input::placeholder {
+  color: #7a7a7a !important;
+  font-style: normal;
+  font-size: small;
+}
+
+.gjs-label {
+  font-size: small;
+}
+
+.gjs-label,
+.gjs-sm-properties .gjs-sm-icon {
+  color: var(--text-color) !important;
+  font-family: Montserrat;
+  font-weight: 600;
+}
+
+.gjs-field input,
+.gjs-field select,
+.gjs-field .gjs-radio-item-label {
+  font-family: Montserrat;
+}
+
+.gjs-field input::placeholder {
+  text-decoration: none;
+  font-size: small;
+}
+
+.selectIcon {
+  content: url("/editor/icons/send-1.svg");
+}
+
+.desktopWindow {
+  content: url("/editor/icons/screen.svg");
+  border-radius: 8px;
+}
+
+.mobilewindow {
+  content: url("/editor/icons/smartphone.svg");
+  border-radius: 8px;
+}
+
+.mobilewindow:hover {
+  background: #edeff0;
+}
+
+.mobilewindow:active {
+  background: #e0e0e0;
+}
+
+.tabWindow {
+  content: url("/editor/icons/tab.svg");
+  border-radius: 8px;
+}
+
+.tabWindow:hover {
+  background: #edeff0;
+}
+
+.tabWindow:active {
+  background: #e0e0e0;
+}
+
+.undo {
+  content: url("/editor/icons/rotate-left.svg");
+}
+
+.redo {
+  content: url("/editor/icons/rotate-right.svg");
+}
+
+.image {
+  content: url("/editor/icons/image-1.svg");
+}
+
+.trash {
+  content: url("/editor/icons/trash-2.svg");
+}
+
+.editor {
+  content: url("/editor/icons/edit-4.svg");
+}
+
+.export {
+  content: url("/editor/icons/download.svg");
+}
+
+.crossCircle {
+  content: url("/editor/icons/cross-circle.svg");
+}
+
+.preview {
+  content: url("/editor/icons/preview.svg");
+}
+
+.dotted_square {
+  content: url("/editor/icons/dotted-square.svg");
+}
+
+@keyframes slideRight {
+  0% {
+    right: -250px;
+  }
+  100% {
+    right: 0px;
+  }
+}
+
+@keyframes slideRightExit {
+  0% {
+    right: 0px;
+  }
+  100% {
+    right: -250px;
+  }
+}
+
+@keyframes slideLeft {
+  0% {
+    left: -250px;
+  }
+  100% {
+    left: 0px;
+  }
+}
+
+@keyframes slideLeftExit {
+  0% {
+    left: 0px;
+  }
+  100% {
+    left: -250px;
+  }
+}

@@ -1,0 +1,192 @@
+.OrganizationSettings {
+  width: 100%;
+  h3 {
+    margin: 20px 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .time-zone {
+    width: 100%;
+    margin-bottom: 20px;
+    .region,
+    .timezone {
+      margin-top: 10px;
+    }
+    .select-input {
+      flex: 1 0 0;
+      margin-top: 10px;
+      margin-right: 10px;
+    }
+  }
+  label {
+    color: var(--secondary-color);
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px; /* 142.857% */
+    margin-bottom: 10px !important;
+  }
+  .default-list {
+    display: flex;
+    width: 500px;
+    justify-content: space-between;
+    select {
+      display: flex;
+      padding: 10px 14px;
+      align-items: center;
+      height: 45px;
+      margin-top: 6px;
+      width: 300px;
+
+      gap: 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--background);
+      outline: 0;
+
+      box-shadow: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+      align-self: stretch;
+      @media screen and (max-width: 768px) {
+        width: 100%;
+      }
+    }
+  }
+  .assign-list {
+    margin-top: 5px;
+  }
+
+  .integration-providers {
+    margin-top: 2rem;
+    &__item {
+      width: 300px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--background);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      .info {
+        display: flex;
+        align-items: center;
+        // gap: 10px;
+        img {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          margin-right: 5px;
+        }
+        h3 {
+          font-size: 14px;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+
+  .team-member {
+    height: 50vh;
+    overflow: auto;
+    .access {
+      overflow: auto;
+      padding: 10px 16px;
+      @media screen and (max-width: 768px) {
+      }
+      width: 100%;
+      .user {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        @media screen and (max-width: 768px) {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        &__info {
+          display: flex;
+          align-items: center;
+          &__name {
+            margin-left: 10px;
+            h3 {
+              font-size: 14px;
+              font-weight: 600;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .mail-signature {
+    margin-top: 2rem;
+    width: 60%;
+    .sign-banner {
+      margin-right: 2rem;
+      &__input {
+        width: max-content;
+        padding: 10px;
+        height: 96px;
+        border-radius: 6.194px;
+        border: 0.774px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        label {
+          cursor: pointer;
+          .add_icon {
+            font-size: 1rem;
+          }
+        }
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+    }
+    .sign-info {
+      width: 60%;
+    }
+  }
+  .del-org {
+    border: 1px solid #cc2127 !important;
+    button {
+      color: #cc2127 !important;
+    }
+    &:hover {
+      background: #d32f2f;
+    }
+  }
+  .delete-confirm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 150px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .OrganizationSettings {
+    .default-list {
+      flex-direction: column;
+      align-items: flex-start;
+      select {
+        width: 100%;
+      }
+    }
+    .mail-signature {
+      width: 100%;
+      .flex-items {
+        flex-direction: column;
+      }
+      .sign-banner {
+        margin-right: 0;
+        margin-bottom: 1rem;
+      }
+      .sign-info {
+        width: 100%;
+      }
+    }
+  }
+}

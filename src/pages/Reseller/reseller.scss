@@ -1,0 +1,7 @@
+.reseller {
+  background: var(--background);
+  height: calc(100vh - 60px);
+  &__content {
+    padding: 10px 16px;
+  }
+}

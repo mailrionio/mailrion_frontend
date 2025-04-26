@@ -1,0 +1,43 @@
+/* print.css */
+
+@page {
+  size: A4;
+  margin: 2cm;
+}
+
+@media print {
+  /* Hide elements not meant for printing */
+  .generalTopNav,
+  .organization_header,
+  .dont-print {
+    display: none !important;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    page-break-after: avoid;
+  }
+
+  table,
+  img,
+  pre,
+  figure,
+  svg,
+  hr,
+  .page-break {
+    page-break-inside: avoid;
+  }
+
+  /* Adjust styling for printing */
+  .printable-content {
+    page-break-inside: avoid;
+    // page-break-after: auto;
+    page-break-before: auto;
+    width: 100%;
+    padding: 20px;
+  }
+}

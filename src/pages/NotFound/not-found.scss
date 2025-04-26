@@ -1,0 +1,33 @@
+.not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100vh;
+  h1 {
+    color: var(--gray-900, #101828);
+    font-size: 48px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 60px; /* 93.75% */
+    letter-spacing: -1.28px;
+  }
+  h3 {
+    color: var(--main-primary-colours, #fb8500);
+    font-size: 36px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 60px; /* 166.667% */
+    letter-spacing: -0.72px;
+  }
+  .not-found-img {
+    width: 400px;
+    height: 300px;
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+}

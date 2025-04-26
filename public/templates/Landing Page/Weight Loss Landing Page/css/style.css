@@ -1,0 +1,611 @@
+/* ----------------------------- */
+/* ------- General Style ------- */
+/* ----------------------------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    background: #ffffff;
+}
+
+a {
+    outline: none;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+a:hover,
+a:active,
+a:focus {
+    outline: none;
+    text-decoration: none;
+}
+
+h1,
+h2,
+h3 {
+    margin: 0 0 15px 0;
+    padding: 0;
+    font-weight: 700;
+}
+
+h4,
+h5,
+h6 {
+    margin: 0 0 10px 0;
+    padding: 0;
+    font-weight: 300;
+}
+
+p {
+    margin: 0 0 15px 0;
+    padding: 0;
+    color: #666666;
+    font-size: 16px;
+    font-weight: 300;
+}
+
+
+/* ----------------------------- */
+/* -------- Header Style ------- */
+/* ----------------------------- */
+.top-header {
+    display: flex;
+    flex-flow: row wrap;
+    width: 100%;
+    padding: 5px 0;
+    background: #9B1B30;
+}
+
+.top-header .top-header-row {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    width: 100%;
+    max-width: 1160px;
+    margin: 0 auto;
+}
+
+.top-header .top-header-col {
+    width: 50%;
+    padding: 0 15px;
+}
+
+.top-header .top-header-col:last-child {
+    text-align: right;
+}
+
+.top-header .top-header-col h2 {
+    color: #FFD662;
+    font-size: 30px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.top-header .top-header-col p {
+    color: #FFD662;
+    font-size: 14px;
+    font-weight: 300;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.header {
+    display: flex;
+    flex-flow: row wrap;
+    width: 100%;
+    background: #FFD662;
+}
+
+.header .header-row {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    width: 100%;
+    max-width: 1160px;
+    margin: 0 auto;
+}
+
+.header .header-col {
+    width: calc(100% - 750px);
+    padding: 0 15px;
+}
+
+.header .header-col:first-child {
+    width: 500px;
+    padding: 0 15px;
+}
+
+.header .header-col:last-child {
+    width: 250px;
+    padding: 0 15px;
+}
+
+.header .header-img {
+    font-size: 0;
+}
+
+.header .header-img img {
+    max-width: 100%;
+}
+
+.header .header-content h2 {
+    color: #9B1B30;
+    font-size: 25px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.header .header-content ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.header .header-content ul li {
+    margin-bottom: 8px;
+    color: #9B1B30;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.header .header-content ul li::before {
+    position: relative;
+    content: "\f00c";
+    font-family: "fontawesome";
+    color: #ffffff;
+    margin-right: 5px;
+}
+
+.header .header-form {
+    position: relative;
+    width: 100%;
+    padding: 15px;
+    background: #9B1B30;
+    border: 1px solid #FFD662;
+    box-shadow: 0 0 5px #000000;
+}
+
+.header .header-form input[type=text],
+.header .header-form input[type=email] {
+    width: 100%;
+    height: 30px;
+    padding: 0 10px;
+    margin-bottom: 10px;
+    border: none;
+    font-size: 12px;
+    color: #666666;
+}
+
+.header .header-form input[type=submit] {
+    display: block;
+    width: 100%;
+    padding: 7px 0;
+    border: none;
+    color: #9B1B30;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: #FFD662;
+    cursor: pointer;
+}
+
+.header .header-form input[type=submit]:hover {
+    color: #FFD662;
+    background: #ffffff;
+}
+
+
+/* ----------------------------- */
+/* ------ How Works Style ------ */
+/* ----------------------------- */
+.work {
+    display: flex;
+    flex-flow: row wrap;
+    width: 100%;
+    padding: 45px 0;
+    background: #f1f1f1;
+}
+
+.work .work-row {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    width: 100%;
+    max-width: 1160px;
+    margin: 0 auto;
+}
+
+.work .work-col:first-child {
+    width: calc(100% - 400px);
+    padding: 0 15px;
+}
+
+.work .work-col:last-child {
+    width: 400px;
+    padding: 0 15px;
+}
+
+.work .work-col h2 {
+    color: #9B1B30;
+    font-size: 25px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.work .work-col p {
+    color: #666666;
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 24px;
+}
+
+.work .work-col a {
+    display: inline-block;
+    padding: 7px 30px;
+    color: #FFD662;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: #9B1B30;
+    cursor: pointer;
+}
+
+.work .work-col a:hover {
+    color: #9B1B30;
+    background: #FFD662;
+}
+
+.work .work-col img {
+    width: 100%;
+}
+
+/* ----------------------------- */
+/* ----- What Doctors Style ---- */
+/* ----------------------------- */
+.doctor {
+    display: flex;
+    flex-flow: row wrap;
+    width: 100%;
+    padding: 45px 0;
+    background: #ffffff;
+}
+
+.doctor .doctor-row {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    width: 100%;
+    max-width: 1160px;
+    margin: 0 auto;
+}
+
+.doctor .doctor-col:first-child {
+    width: calc(100% - 400px);
+    padding: 0 15px;
+}
+
+.doctor .doctor-col:last-child {
+    width: 400px;
+    padding: 0 15px;
+}
+
+.doctor .doctor-col h2 {
+    color: #9B1B30;
+    font-size: 25px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.doctor .doctor-col p {
+    color: #666666;
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 24px;
+}
+
+.doctor .doctor-col p:last-child {
+    margin: 0;
+}
+
+.doctor .doctor-img {
+    width: 100%;
+    font-size: 0;
+}
+
+.doctor .doctor-img img {
+    display: inline-block;
+    margin-right: 10px;
+    width: calc(33.33% - 7px);
+    border: 5px solid #f1f1f1;
+}
+
+.doctor .doctor-img img:last-child {
+    margin: 0;
+}
+
+.doctor .doctor-sgs h2 {
+    color: #9B1B30;
+    font-size: 22px;
+    font-weight: 300;
+    text-transform: uppercase;
+}
+
+.doctor .doctor-sgs ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.doctor .doctor-sgs li {
+    margin-bottom: 10px;
+    color: #666666;
+}
+
+.doctor .doctor-sgs li::before {
+    position: relative;
+    content: "\f00c";
+    font-family: "fontawesome";
+    color: #9B1B30;
+    margin-right: 5px;
+}
+
+.doctor .doctor-sgs a {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 7px 30px;
+    color: #FFD662;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: #9B1B30;
+    cursor: pointer;
+}
+
+.doctor .doctor-sgs a:hover {
+    color: #9B1B30;
+    background: #FFD662;
+}
+
+
+/* ----------------------------- */
+/* ------- Buy Now Style ------- */
+/* ----------------------------- */
+.buy-now {
+    display: flex;
+    flex-flow: row wrap;
+    width: 100%;
+    padding: 45px 0;
+    background: #f1f1f1;
+}
+
+.buy-now .buy-now-row {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    width: 100%;
+    max-width: 1160px;
+    margin: 0 auto;
+}
+
+.buy-now .buy-now-col {
+    width: 33.33%;
+    padding: 0 15px;
+}
+
+.buy-now .buy-now-box {
+    width: 100%;
+    text-align: center;
+    background: #ffffff;
+}
+
+.buy-now .buy-now-title {
+    position: relative;
+    width: 100%;
+    height: 60px;
+    padding: 15px;
+    background: #FFD662;
+    text-align: left;
+}
+
+.buy-now .buy-now-title h2:first-child {
+    margin: 0;
+    color: #ffffff;
+    font-size: 25px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.buy-now .buy-now-title h2:last-child {
+    position: absolute;
+    height: 60px;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 5px 15px 5px 30px;
+    color: #FFD662;
+    font-size: 40px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: #9B1B30;
+}
+
+.buy-now .buy-now-title h2:last-child span {
+    position: absolute;
+    margin-top: 8px;
+    margin-left: -16px;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.buy-now .buy-now-img {
+    width: 100%;
+    height: 200px;
+    padding: 15px;
+    background: #ffffff;
+}
+
+.buy-now .buy-now-img img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.buy-now .buy-now-des {
+    width: 100%;
+    background: #ffffff;
+}
+
+.buy-now .buy-now-des ul {
+    margin: 10px 0;
+    padding: 0;
+    list-style: none;
+}
+
+.buy-now .buy-now-des li {
+    margin-bottom: 5px;
+    color: #666666;
+    font-size: 15px;
+}
+
+.buy-now .buy-now-btn {
+    width: 100%;
+    padding: 15px 15px 30px 15px;
+}
+
+.buy-now .buy-now-btn a {
+    display: inline-block;
+    padding: 15px 30px;
+    color: #FFD662;
+    font-size: 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: #9B1B30;
+    cursor: pointer;
+}
+
+.buy-now .buy-now-btn a:hover {
+    color: #9B1B30;
+    background: #FFD662;
+}
+
+
+/* ----------------------------- */
+/* ------- Footer Style -------- */
+/* ----------------------------- */
+.footer {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    width: 100%;
+    padding: 30px 0;
+    background: #FFD662;
+}
+
+.footer p {
+	width: 100%;
+    color: #9B1B30;
+    font-size: 14px;
+    font-weight: 300;
+	text-align: center;
+}
+
+.footer p:last-child {
+    margin: 0;
+}
+
+.footer a {
+	color: #9B1B30;
+	font-weight: 600;
+}
+
+.footer a:hover {
+	color: #ffffff;
+}
+
+
+/* ----------------------------- */
+/* ----- Responsive Style ------ */
+/* ----------------------------- */
+@media (max-width: 992px) {
+    .header .header-col {
+        width: calc(100% - 600px);
+    }
+
+    .header .header-col:first-child {
+        width: 400px;
+    }
+
+    .header .header-col:last-child {
+        width: 200px;
+    }
+    
+    .header .header-form input[type=text],
+    .header .header-form input[type=email] {
+        height: 25px;
+        margin-bottom: 5px;
+    }
+    
+    .header .header-form input[type=submit] {
+        height: 25px;
+        padding: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .top-header .top-header-col {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .top-header .top-header-col:last-child {
+        text-align: center;
+    }
+    
+    .header .header-row {
+        justify-content: center;
+    }
+    
+    .header .header-col,
+    .header .header-col:first-child,
+    .header .header-col:last-child {
+        width: 100%;
+        margin-bottom: 30px;
+    }
+    
+    .header .header-form input[type=text],
+    .header .header-form input[type=email] {
+        height: 30px;
+        margin-bottom: 10px;
+    }
+    
+    .header .header-form input[type=submit] {
+        height: 30px;
+        padding: 3px;
+    }
+    
+    .work .work-col:first-child,
+    .doctor .doctor-col:first-child {
+        width: 100%;
+        margin-bottom: 30px;
+    }
+    
+    .work .work-col:last-child,
+    .doctor .doctor-col:last-child {
+        width: 100%;
+    }
+    
+    .buy-now .buy-now-col {
+        width: 100%;
+        margin-bottom: 30px;
+    }
+    
+    .buy-now .buy-now-col:last-child {
+        margin-bottom: 0;
+    }
+}

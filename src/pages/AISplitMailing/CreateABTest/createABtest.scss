@@ -1,0 +1,191 @@
+.create-ab-test {
+  .color-hr {
+    width: 100% !important;
+  }
+  .test-fields {
+    padding: 10px 16px;
+    .two-fields {
+      display: flex;
+      justify-content: space-between;
+      .field {
+        width: 48%;
+      }
+    }
+  }
+  .subject-line {
+    padding: 10px 16px;
+    .subjects {
+      padding: 10px 0;
+      .subject {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        .subject-remove {
+          margin: 2.1rem 1rem 0 0;
+        }
+      }
+    }
+  }
+  .recipients {
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .ab-settings {
+    padding: 10px 16px;
+    .ab-settings-content {
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+  .ab-test-configure {
+    padding: 10px 16px;
+    margin-top: 1rem;
+    .ab-slider {
+      width: 100%;
+      p {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        span {
+          font-size: 14px;
+          color: var(--text-color);
+          opacity: 0.7;
+        }
+      }
+      .input-slider-cont {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 5px;
+      }
+      .input-slider {
+        width: 100%;
+        height: 20px;
+        accent-color: var(--primary-color);
+        outline: none;
+        // -webkit-appearance: none;
+        // appearance: none;
+        border-radius: 40px;
+
+        &::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          cursor: ew-resize;
+        }
+        &::-moz-range-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          cursor: ew-resize;
+        }
+        &::-ms-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          cursor: ew-resize;
+        }
+      }
+    }
+    .ab-test-criteria {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: space-between;
+      // align-items: center;
+      .criteria-selection {
+        width: 60%;
+        .manual-criteria {
+          margin-top: 1rem;
+          .criteria {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+          }
+        }
+      }
+      .test-group {
+        display: flex;
+        // align-items: center;
+        .name {
+          margin-right: 2rem;
+          p {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            margin-left: 5px;
+            &:not(:last-child) {
+              margin-bottom: 10px;
+            }
+            .dotted {
+              width: 10px;
+              height: 10px;
+              background-color: var(--primary-color);
+              border-radius: 50%;
+              margin-right: 10px;
+            }
+            .b {
+              background-color: #fb8500;
+            }
+            .c {
+              background-color: var(--secondary-color);
+            }
+          }
+        }
+        .percentage {
+          h3 {
+            color: var(--primary-color);
+          }
+          p {
+            font-size: 13px;
+            &:not(:last-child) {
+              margin-bottom: 10px;
+            }
+          }
+        }
+      }
+    }
+  }
+  .btns {
+    margin-top: 2rem;
+  }
+
+  @media screen and (max-width: 720px) {
+    .subject-line {
+      .subjects {
+        .subject {
+          .subject-remove {
+            margin: 2.1rem 0 0 0;
+          }
+        }
+      }
+    }
+    .ab-test-configure {
+      .ab-slider {
+        p {
+          span {
+            font-size: 12px;
+          }
+        }
+      }
+    }
+
+    .ab-test-criteria {
+      flex-direction: column;
+      .criteria-selection {
+        width: 100%;
+      }
+      .test-group {
+        margin-top: 1rem;
+        .name {
+          margin-right: 0;
+          margin-bottom: 1rem;
+        }
+      }
+    }
+
+    .btns {
+      margin-top: 1rem;
+    }
+  }
+}

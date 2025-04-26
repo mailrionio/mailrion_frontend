@@ -1,0 +1,37 @@
+.chartjs {
+  display: flex;
+  flex-direction: column;
+  margin-left: 20px;
+  margin-bottom: 20px;
+  // justify-content: center;
+  @media screen and (max-width: 768px) {
+    display: none;
+  }
+  align-items: center;
+  .VictoryContainer {
+    height: 300px !important;
+    margin-top: -2rem;
+  }
+  .chart-color-identify {
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+    width: 450px;
+    flex-wrap: wrap;
+    .chartjs__item {
+      display: flex;
+      align-items: center;
+      margin-left: 10px;
+      p {
+        margin-left: 5px;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 20px;
+        color: var(--text-color);
+      }
+      &:not(:last-child) {
+        margin-right: 10px;
+      }
+    }
+  }
+}

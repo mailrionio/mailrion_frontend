@@ -1,0 +1,41 @@
+.white-label {
+  height: calc(100vh - 60px);
+  background-color: var(--background);
+
+  .choose-option {
+    padding: 10px 16px;
+    display: flex;
+    margin-top: 2rem;
+    .option {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 5px;
+      margin-top: 5rem;
+      .option-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px 26px;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        margin-right: 10px;
+        cursor: pointer;
+        svg {
+          margin-right: 10px;
+        }
+        &:hover {
+          background-color: var(--primary-color);
+        }
+      }
+    }
+  }
+  .configure-white-label {
+    h3 {
+      span {
+        color: var(--primary-color) !important;
+        text-transform: lowercase;
+      }
+    }
+  }
+}

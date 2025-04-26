@@ -1,0 +1,63 @@
+.schedule-campaign {
+  position: relative;
+  .filter-options {
+    margin: 1rem 0;
+  }
+  .calendar {
+    margin-right: 10px;
+  }
+  .select-days {
+    // margin: 0 16px;
+    display: flex;
+    h3 {
+      color: var(--gray-700, #344054);
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: 20px; /* 142.857% */
+    }
+    .select-day-wrap {
+      width: fit-content;
+      &__days {
+        margin-top: 5px;
+        border-radius: 8px;
+        border: 1px solid rgba(118, 118, 128, 0.12);
+        -webkit-border-radius: 8px;
+        -moz-border-radius: 8px;
+        -ms-border-radius: 8px;
+        -o-border-radius: 8px;
+        width: max-content;
+        .day-option {
+          display: flex;
+          cursor: pointer;
+          font-size: 13px;
+          font-weight: 600;
+          color: #000;
+          padding: 8px 7.5px 8px 8px;
+          width: 100%;
+          p {
+            font-size: 13px;
+          }
+          input {
+            margin-right: 5px;
+          }
+          &.active {
+            background: var(--primary-color);
+            p {
+              color: #fff;
+            }
+          }
+        }
+      }
+    }
+  }
+  .btns-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    .btns {
+      display: flex;
+    }
+  }
+}

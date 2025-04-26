@@ -1,0 +1,37 @@
+.UserSettings {
+  .edit-info {
+    padding-bottom: 5px;
+    h3 {
+      color: var(--main-primary-colours, #fb8500);
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 24px; /* 200% */
+      cursor: pointer;
+    }
+    .edit-btn {
+      color: var(--main-primary-colours, #fb8500);
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 24px; /* 171.429% */
+      cursor: pointer;
+    }
+  }
+  .delete-btn {
+    margin-top: 2rem;
+    display: inline-flex;
+    padding: 10px 16px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    color: #cc2127;
+
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px; /* 142.857% */
+    border-radius: 8px;
+    border: 1px solid #cc2127;
+  }
+}

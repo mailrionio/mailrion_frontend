@@ -1,0 +1,33 @@
+.resources {
+  height: calc(100vh - 60px);
+  overflow: auto;
+  background: var(--background);
+  &__list {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10px 16px;
+    margin-top: 20px;
+    gap: 10px;
+    @media (max-width: 768px) {
+      justify-content: center;
+    }
+    &__item {
+      width: 320px;
+      // height: 250px;
+      background: var(--card-color);
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 20px;
+      @media (max-width: 768px) {
+        width: 100%;
+      }
+      h4 {
+        font-size: 16px;
+      }
+
+      &:hover {
+        background: var(--border-color);
+      }
+    }
+  }
+}

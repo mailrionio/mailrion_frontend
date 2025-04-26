@@ -1,0 +1,160 @@
+.email-templates {
+  position: relative;
+  height: 458px;
+  overflow-y: auto;
+  padding-right: .5rem;
+
+  .templateContainer {
+    margin-top: 12px;
+
+    .gridContainer {
+      grid-column-gap: 20px;
+      grid-row-gap: 38px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+
+      .gridItem {
+        width: 100%;
+        border: none !important;
+
+        .imgContainer {
+          position: relative;
+          aspect-ratio: 16 / 9;
+          width: 100%;
+          overflow: hidden;
+          border-radius: 15px;
+
+          img {
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+          }
+
+          &::after {
+            display: block;
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            transition: all 0.2s ease-in-out;
+            transform: translateY(250px);
+          }
+
+          .btnContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+            z-index: 10;
+            gap: 10px;
+            transition: all 0.2s ease-in-out;
+            transform: translateY(250px);
+
+            button {
+              border: 1px solid #fb8500;
+              border-radius: 999px;
+              width: 50%;
+              font-family: inherit;
+              font-size: medium;
+              font-weight: 500;
+              padding: 0.5rem 0;
+            }
+
+            button:hover {
+              background: #d67200;
+              border: 1px solid #d67200;
+            }
+
+            .btnEdit {
+              background: #fb8500;
+              color: white;
+            }
+
+            .btnView {
+              color: #fb8500;
+            }
+
+            .btnView:hover {
+              color: white;
+            }
+          }
+        }
+
+        .imgContainer:hover {
+          &::after {
+            transform: translateY(0px);
+          }
+        }
+
+        .imgContainer:hover > .btnContainer {
+          transform: translateY(-50%);
+        }
+
+        p {
+          margin-top: 0.5rem;
+        }
+      }
+
+      .gridItem.blank {
+        div {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          cursor: pointer;
+          border: 1px solid var(--input-color);
+          color: var(--input-color);
+          aspect-ratio: 16 / 9;
+          border-radius: 15px;
+          font-size: 3rem;
+          transition: none;
+        }
+
+        div:hover {
+          color: var(--primary-color);
+          border: 1px solid var(--primary-color);
+        }
+
+        p {
+          margin-top: 0.5rem;
+        }
+      }
+    }
+  }
+}
+
+.btnContainerEdit {
+  position: absolute;
+  width: 100%;
+  padding: .5rem 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--input-color);
+  bottom: 0;
+  left: 0;
+
+  .btnContinueEdit {
+    border: 1px solid var(--secondary-color);
+    color: var(--secondary-color);
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: .7rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+  }
+
+  .btnContinueEdit:hover {
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+  }
+}

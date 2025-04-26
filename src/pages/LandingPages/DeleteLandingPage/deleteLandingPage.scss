@@ -1,0 +1,48 @@
+.text {
+  padding: 12px 0;
+  font-size: 14px;
+  text-align: center;
+}
+
+.btns-container {
+  display: flex;
+  justify-content: center !important;
+  align-items: center;
+  margin: 12px;
+
+  button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    gap: 8px;
+    width: 5rem;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-family: "Montserrat", sans-serif;
+  }
+
+  .btn-no {
+    border: 1px solid var(--theme-grey-mail-bg, #d0d5dd);
+    background: var(--white, #fff);
+    margin-right: 1rem;
+  }
+  .btn-no:hover {
+    border: 1px solid #dd7601;
+    color: #dd7601;
+  }
+  .btn-yes {
+    border: 1px solid var(--main-primary-colours, #fb8500);
+    background: var(--main-primary-colours, #fb8500);
+    color: #fff;
+  }
+  .btn-yes:hover {
+    background: #dd7601;
+    border: 1px solid #dd7601;
+  }
+  .btn-yes:disabled {
+    background: #dedfe0;
+    border: 1px solid #dedfe0;
+    cursor: not-allowed;
+  }
+}

@@ -1,0 +1,32 @@
+.paginationContainer {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  margin-bottom: 15px;
+  justify-content: center;
+
+  .paginationButton {
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
+    border-radius: 4px;
+    font-family: "Montserrat", sans-serif;
+  }
+
+  .paginationButton:hover {
+    background-color: #f0f0f0;
+  }
+
+  .paginationButton.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+  }
+
+  .paginationButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

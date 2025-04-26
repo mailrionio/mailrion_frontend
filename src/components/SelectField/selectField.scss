@@ -1,0 +1,74 @@
+.select-container {
+	width: 100%;
+	margin-top: 15px;
+	background: transparent;
+	label {
+		margin-bottom: 1.5rem;
+		color: var(--secondary-color);
+		font-size: 16px;
+		font-style: normal;
+		font-weight: 500;
+		line-height: 20px;
+	}
+	.select-group {
+		margin-top: 10px !important;
+		display: flex;
+		cursor: pointer;
+		width: 100%;
+		padding: 8px 14px;
+		align-items: center;
+		justify-content: space-between;
+		gap: 10px;
+		border-radius: 8px;
+		border: 1px solid var(--border-color);
+		-webkit-border-radius: 8px;
+		-moz-border-radius: 8px;
+		-ms-border-radius: 8px;
+		-o-border-radius: 8px;
+		select {
+			width: 100%;
+			height: 100%;
+			border: none;
+			outline: none;
+			background: transparent;
+			color: var(--secondary-color);
+			font-size: 16px;
+			font-family: 'Poppins', cursive, sans-serif;
+			font-weight: 500;
+			&::placeholder {
+				color: #344054 !important;
+				opacity: 0.5;
+				font-style: italic;
+			}
+			option {
+				color: var(--secondary-color);
+				font-size: 16px;
+				font-family: 'Poppins', cursive, sans-serif;
+				font-weight: 500;
+			}
+			&:active {
+				outline: none;
+			}
+		}
+	}
+	&:focus-within .select-group {
+		border-color: var(--text-color) !important;
+	}
+}
+
+.select-container.disabled {
+	label {
+		color: #d0d5dd;
+	}
+	.select-group {
+		border-color: #d0d5dd !important;
+		select {
+			cursor: not-allowed;
+			user-select: none;
+			color: #d0d5dd !important;
+			&::placeholder {
+				color: #d0d5dd !important;
+			}
+		}
+	}
+}

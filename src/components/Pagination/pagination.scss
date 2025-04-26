@@ -1,0 +1,90 @@
+.pagination-container {
+  display: flex;
+  list-style-type: none;
+  border: 1px solid var(--border-color);
+  position: relative;
+  border-radius: 16px;
+  justify-content: space-between;
+  padding: 8px 0;
+  .pagination-number {
+    display: flex;
+    align-items: center;
+  }
+  .pagination-item {
+    padding: 0 12px;
+    height: 32px;
+    text-align: center;
+    margin: auto 4px;
+    color: var(--text-color);
+    display: flex;
+    box-sizing: border-box;
+    align-items: center;
+    letter-spacing: 0.01071em;
+    border-radius: 16px;
+    line-height: 1.43;
+    font-size: 13px;
+    min-width: 32px;
+
+    &.dots:hover {
+      background-color: transparent;
+      cursor: default;
+    }
+    &:hover {
+      background-color: var(--secondary-color);
+      cursor: pointer;
+      color: var(--primary-color);
+    }
+
+    &.selected {
+      background-color: var(--primary-color);
+      &:hover {
+        color: var(--text-color);
+      }
+    }
+
+    .arrow {
+      &::before {
+        position: relative;
+        /* top: 3pt; Uncomment this to lower the icons as requested in comments*/
+        content: "";
+        /* By using an em scale, the arrows will size with the font */
+        display: inline-block;
+        width: 0.4em;
+        height: 0.4em;
+        border-right: 0.12em solid var(--border-color);
+        border-top: 0.12em solid var(--border-color);
+      }
+
+      &.left {
+        transform: rotate(-135deg) translate(-50%);
+      }
+
+      &.right {
+        transform: rotate(45deg);
+        position: absolute;
+        right: 20px;
+      }
+    }
+
+    &.disabled {
+      pointer-events: none;
+      color: var(--border-color);
+      .arrow::before {
+        border-right: 0.12em solid var(--border-color);
+        border-top: 0.12em solid var(--border-color);
+      }
+
+      &:hover {
+        background-color: transparent;
+        cursor: default;
+      }
+    }
+  }
+}
+
+.pagination-bar {
+  width: 100%;
+  display: flex;
+  // justify-content: center;
+  margin-top: 10px;
+}

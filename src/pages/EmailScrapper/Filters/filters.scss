@@ -1,0 +1,55 @@
+.email-filters {
+  width: 300px;
+  padding: 10px 0;
+  .filter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    p {
+      color: var(--primary-color);
+      cursor: pointer;
+    }
+    label {
+      color: var(--secondary-color);
+      margin-bottom: 10px;
+    }
+  }
+  @media screen and (max-width: 768px) {
+    width: 100%;
+    .desktop-filters {
+      display: none;
+    }
+  }
+
+  .email-filters-select-mobile {
+    display: none;
+    width: 100%;
+    padding: 10px 0;
+    border-radius: 5px;
+    border: 1px solid var(--secondary-color);
+    color: var(--secondary-color);
+    option {
+      color: var(--secondary-color);
+      background-color: var(--primary-color);
+    }
+    @media screen and (max-width: 768px) {
+      display: block;
+    }
+  }
+  .selected {
+    align-items: center;
+    gap: 10px;
+    display: none;
+    @media screen and (max-width: 768px) {
+      display: flex;
+    }
+    .sel {
+      color: var(--primary-color);
+      span {
+        color: red;
+        margin-left: 5px;
+        cursor: pointer;
+      }
+    }
+  }
+}

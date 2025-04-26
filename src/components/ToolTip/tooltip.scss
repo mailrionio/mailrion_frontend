@@ -1,0 +1,77 @@
+.tooltipContainer {
+  position: relative;
+}
+
+.tooltipContainer:hover .tooltip {
+  visibility: visible;
+}
+
+.tooltip {
+  position: absolute;
+  color: #000;
+  background: linear-gradient(to bottom, var(--background), var(--background));
+  top: -20px;
+  left: 40px;
+  transform: translateX(-30%) translateY(-100%);
+  padding: 3px 10px;
+  text-align: center;
+  min-width: max-content;
+  font-size: 14px;
+  font-weight: 400;
+  visibility: hidden;
+  -webkit-transform: translateX(-30%) translateY(-100%);
+  -moz-transform: translateX(-30%) translateY(-100%);
+  -ms-transform: translateX(-30%) translateY(-100%);
+  -o-transform: translateX(-30%) translateY(-100%);
+}
+
+.disabled {
+  visibility: hidden !important;
+}
+
+.down {
+  top: 22px;
+  transform: translateX(-30%) translateY(100%);
+  -webkit-transform: translateX(-30%) translateY(100%);
+  -moz-transform: translateX(-30%) translateY(100%);
+  -ms-transform: translateX(-30%) translateY(100%);
+  -o-transform: translateX(-30%) d translateY(100%);
+}
+
+.down:before {
+  top: calc(-100% + 14px);
+  border-bottom: 10px solid var(--border-color);
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 1px solid transparent;
+}
+
+.left {
+  left: -20px;
+  top: 40px;
+  transform: translateX(-100%) translateY(-50%);
+}
+
+.left:before {
+  left: calc(100% - 14px);
+  top: calc(50% - 10px);
+  border-left: 10px solid var(--border-color);
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-right: 1px solid transparent;
+}
+
+.right {
+  left: calc(100% + 20px);
+  top: 40px;
+  transform: translateX(0) translateY(-50%);
+}
+
+.right:before {
+  left: -10px;
+  top: calc(50% - 10px);
+  border-right: 10px solid var(--border-color);
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 1px solid transparent;
+}

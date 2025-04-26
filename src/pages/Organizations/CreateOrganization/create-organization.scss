@@ -1,0 +1,114 @@
+.new-org {
+  .org-modal-logo {
+    margin: 20px 0 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    @media screen and (max-width: 700px) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+    .logo-info {
+      display: flex;
+      align-items: center;
+      .logo {
+        width: 100px;
+        height: 100px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 28px;
+        background: #f4f4f4;
+        -webkit-border-radius: 28px;
+        -moz-border-radius: 28px;
+        -ms-border-radius: 28px;
+        -o-border-radius: 28px;
+        margin-right: 10px;
+        .actLogo {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+      }
+      .logo-req {
+        h4 {
+          color: var(--theme-dark-blue, #344054);
+          font-size: 18px;
+          font-family: "Poppins";
+          font-style: normal;
+          font-weight: 500;
+          line-height: 20px;
+          margin-bottom: 8px;
+        }
+        p {
+          color: var(--grey-text, #667085);
+          font-size: 14px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 20px;
+        }
+      }
+    }
+    .logo-btn {
+      display: flex;
+      padding: 10px 16px;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid var(--theme-grey-mail-bg, #d0d5dd);
+      background: var(--white, #fff);
+      @media screen and (max-width: 700px) {
+        margin-top: 10px;
+      }
+    }
+  }
+  .org-modal-inputs {
+  }
+  .org-modal-btns {
+    margin-top: 20px;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    .btns {
+      display: flex;
+      align-items: center;
+
+      .cancel {
+        display: flex;
+        height: 48px;
+        padding: 8px 16px;
+        justify-content: center;
+        cursor: pointer;
+        align-items: center;
+        // gap: 8px;
+        border-radius: 8px;
+        border: 1px solid var(--theme-grey-mail-bg, #d0d5dd);
+        background: var(--white, #fff);
+        margin-right: 1rem;
+      }
+      .create {
+        display: flex;
+        padding: 12px 20px;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        gap: 8px;
+        border-radius: 8px;
+        border: 1px solid var(--main-primary-colours, #fb8500);
+        background: var(--main-primary-colours, #fb8500);
+        color: #fff;
+      }
+    }
+  }
+  @media screen and (max-width: 700px) {
+    padding: 20px;
+  }
+  @media screen and (max-width: 700px) {
+    padding: 20px;
+  }
+}
