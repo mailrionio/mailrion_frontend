@@ -37,7 +37,7 @@ const InputField: FC<InputFieldProps> = ({
       className={`input-container ${classes} ${disabled ? "disabled" : ""}`}
     >
       <label htmlFor={name}>
-        {label} {required && <span>*</span>}
+        {label}{required && <span className="required">*</span>}
       </label>
       <div className="input-group">
         <input

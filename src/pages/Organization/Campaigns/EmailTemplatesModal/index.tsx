@@ -70,8 +70,9 @@ const EmailTemplatesModal = ({ handleClose, hasContent, campaignName }: props) =
     <GeneralModal
       title={"Email Templates"}
       subTitle="Select from these email templates or create from scratch"
-      width={"800px"}
+      width={"90%"}
       height={"580px"}
+      maxWidth={"800px"}
       handleClose={handleClose}
     >
       <>

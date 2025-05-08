@@ -17,6 +17,10 @@ export interface IListData {
   };
 }
 
+export interface DeleteListContactData {
+  message: string;
+}
+
 export interface IGetListsResp {
   data: IListData[];
   links: {
@@ -182,7 +186,10 @@ export const DeleteList = async (listID: string) => {
   }
 };
 
-export const DeleteListContact = async (listID: string, contactID: string) => {
+export const DeleteListContact = async (
+  listID: string,
+  contactID: string
+) => {
   try {
     const res = await API.delete(
       `/campaign/deletes/contacts/${listID}/${contactID}`

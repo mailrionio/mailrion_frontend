@@ -209,6 +209,8 @@
 
           .gridItem {
             width: 100%;
+            border: 1px solid #dadada;
+            border-radius: 18px;
 
             .imgContainer {
               position: relative;
@@ -253,7 +255,7 @@
                 button {
                   border: 1px solid #fb8500;
                   border-radius: 999px;
-                  width: 30%;
+                  width: 80%;
                   font-family: inherit;
                   font-size: medium;
                   font-weight: 500;
@@ -292,6 +294,11 @@
 
             p {
               margin-top: 0.5rem;
+            }
+
+            &:hover {
+              border: 1px solid var(--main-primary-colours, #fb8500);
+              transition: all 0.2s ease-in-out;
             }
           }
         }

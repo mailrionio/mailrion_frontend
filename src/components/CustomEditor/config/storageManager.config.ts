@@ -29,7 +29,11 @@ export const storageManager = (
       const formData = new FormData();
       const html = editor.getHtml();
       const css = editor.getCss();
-      const cont = JSON.stringify({ html, css, headContent });
+      const cont = JSON.stringify({
+            RIONHTML: html,
+            RIONCSS: css,
+            RIONHEAD: headContent,
+          })
 
       // Save Campaign
       if (isNewsLetter) {
@@ -55,18 +59,19 @@ export const storageManager = (
 
         for (let [key, value] of formData.entries()) {
           console.log(`CANVASDATA ==> ${emailBuilder.canvasData}`);
+          console.log(`CONTENT ==> ${emailBuilder.content}`);
         }
 
-        // const formdata = new FormData();
-        // formdata.append("file", screenshot, "screenshot.png");
+        const formdata = new FormData();
+        formdata.append("file", screenshot, "screenshot.png");
 
-        // const response = await fetch("http://localhost:5000/upload", {
-        //   method: "POST",
-        //   body: formdata,
-        // });
+        const response = await fetch("http://localhost:5000/upload", {
+          method: "POST",
+          body: formdata,
+        });
 
-        // const data = await response.json();
-        // console.log("UPLOADED SUCCESSFULLY ===> ", data);
+        const data = await response.json();
+        console.log("UPLOADED SUCCESSFULLY ===> ", data);
 
         const resp = await UpdateCampaignAPI(formData, orgId, campaignId);
 
@@ -81,7 +86,7 @@ export const storageManager = (
           return null;
         }
 
-        const {
+        let {
           assets,
           canvasData,
           content,
@@ -91,8 +96,10 @@ export const storageManager = (
           symbols,
         } = emailBuilderResp.attributes;
 
-        const { email_builder, ...restCampaignData } = (resp as ICampaignResp)
+        let { email_builder, ...restCampaignData } = (resp as ICampaignResp)
           .attributes;
+
+        content = stripQuotes(restCampaignData.content);
 
         const projData = {
           userId,

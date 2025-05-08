@@ -3,11 +3,24 @@ import {
   GetAllBuilderUploadAPI,
 } from "@/redux/features/BuilderUploadSlice/services";
 import { AdminComposeNewMail } from "@/redux/features/mailingSlice/services";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  Navigate,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { inlineStyles, toTitleCase, transformSelection } from "@/helpers";
 import { emailTempData, templateData, TemplateEntry } from "@/templates";
-import { setTemplate, setToggleStep } from "@/redux/features/utilSlice";
-import { useEffect, useState, useRef, ChangeEvent, memo } from "react";
+import { setIsNewsLetter, setTemplate, setToggleStep } from "@/redux/features/utilSlice";
+import {
+  useEffect,
+  useState,
+  useRef,
+  ChangeEvent,
+  memo,
+  useCallback,
+  useMemo,
+} from "react";
 import { UpperCaseIcon, LowerCaseIcon, TitleCaseIcon } from "@/assets";
 import "grapesjs-rte-extensions/dist/grapesjs-rte-extensions.min.css";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
@@ -23,7 +36,7 @@ import {
   GetPageTemplateAPI,
   IGetPageTemplateResp,
 } from "@/redux/features/PagesSlice/services";
-import { stripQuotes } from "@/helpers/strip";
+import { extractRionContent, stripQuotes } from "@/helpers/strip";
 import grapesjs, { Editor } from "grapesjs";
 import {
   ICampaignResp,
@@ -43,7 +56,97 @@ import {
 import $ from "jquery";
 import "./styles.scss";
 
+// Add interface for PanelTop props
+interface PanelTopProps {
+  isNewsLetter: boolean;
+  campaignName: string | null;
+  pageName: string | null;
+  isSaving: boolean;
+  isLoadingGet: boolean;
+  showIsLoading: boolean;
+  isLoadingUpd: boolean;
+  isError: {
+    load: boolean;
+    store: boolean;
+  };
+  errorLoading: boolean;
+  isLoadingPage: boolean;
+  handleOnSave: () => Promise<void>;
+  handleOnDone: () => Promise<void>;
+  publishPage: () => Promise<void>;
+}
+
+// Memoized components
+const PanelTop = memo(function PanelTop({
+  isNewsLetter,
+  campaignName,
+  pageName,
+  isSaving,
+  isLoadingGet,
+  showIsLoading,
+  isLoadingUpd,
+  isError,
+  errorLoading,
+  isLoadingPage,
+  handleOnSave,
+  handleOnDone,
+  publishPage,
+}: PanelTopProps) {
+  return (
+    <div className="panel__top">
+      <div>
+        <h5 className="page_title">
+          {isNewsLetter
+            ? stripQuotes(campaignName)
+            : stripQuotes(pageName) || "PageName"}
+        </h5>
+        <div className="panel__switcher"></div>
+      </div>
+      <div className="gjs-panel-action-buttons">
+        <div className="views-actions"></div>
+      </div>
+      <div className="panel-action">
+        {(isSaving || (isLoadingGet && showIsLoading)) && !isLoadingUpd && (
+          <div className="saving">
+            <BsArrowRepeat fontSize={18} />{" "}
+            <span>{isSaving ? "Saving..." : "Loading..."}</span>
+          </div>
+        )}
+        {(isError.load || isError.store || errorLoading) && (
+          <div className="error">
+            <MdOutlineErrorOutline fontSize={18} />
+            <span>
+              Error{" "}
+              {isError.load ? "loading" : isError.store ? "saving" : "loading"}
+            </span>
+          </div>
+        )}
+        <button
+          className="btn btn-primary"
+          disabled={isLoadingPage || isLoadingUpd || isSaving}
+          onClick={handleOnSave}
+        >
+          {isLoadingPage || isLoadingUpd ? "Updating..." : "Save"}
+        </button>
+        <button
+          className="btn btn-primary-outline"
+          disabled={isLoadingUpd || isSaving}
+          onClick={handleOnDone}
+        >
+          Done
+        </button>
+        {!isNewsLetter && (
+          <button className="btn btn-primary" onClick={publishPage}>
+            Publish
+          </button>
+        )}
+      </div>
+    </div>
+  );
+});
+
 const CustomEditor: React.FC = () => {
+  // Memoized selectors
   const { template, step, isNewsLetter } = useAppSelector(
     (state) => state.utils
   );
@@ -53,6 +156,11 @@ const CustomEditor: React.FC = () => {
     errorLoading,
     isLoadingGet,
   } = useAppSelector((state) => state.landingPage);
+  const {
+    selectedOrganization: { id: orgID },
+  } = useAppSelector((state) => state.organization);
+
+  // State management
   const [manager, setManager] = useState<ManagerState>({
     style: !isNewsLetter,
     layer: false,
@@ -75,11 +183,6 @@ const CustomEditor: React.FC = () => {
     panelRight: false,
   });
   const [isLoading, setIsLoading] = useState(false);
-  const { pageId } = useParams();
-  let htmlData: Record<string, string> | null = null;
-  const { category, label } = template;
-  const pageDB = new IndexedDBCrud<IPageIndexedDB>(dbOptions);
-  const campaignDB = new IndexedDBCrud<ICampaignDB>(dbCampaignOpts);
   const [storeSaved, setStoreSaved] = useState({
     isSaving: false,
     isError: {
@@ -87,43 +190,128 @@ const CustomEditor: React.FC = () => {
       load: false,
     },
   });
-  const {
-    selectedOrganization: { id: orgID },
-  } = useAppSelector((state) => state.organization);
-  const { isSaving, isError } = storeSaved;
+
+  // Refs
+  const isInitialMount = useRef(true);
+  const ToCaptureRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<Editor | null>(null);
+
+  // Hooks
+  const navigate = useNavigate();
+  const { pageId } = useParams();
   const params = useSearchParams()[0];
   const orgsId = params.get("orgsId");
   const orgsNum = params.get("orgsNum");
-  const isInitialMount = useRef(true);
-  const navigate = useNavigate();
-  const initialized = localStorage.getItem("initialized");
+
+  localStorage.setItem("isNewsLetter", orgsId && orgsNum ? "true" : "false");
+  dispatch(setIsNewsLetter(orgsId && orgsNum ? true : false));
+
+  if (!localStorage.getItem("initialized")) {
+    localStorage.setItem("initialized", "false");
+  }
+
+  // Memoized values
+  const pageDB = useMemo(
+    () => new IndexedDBCrud<IPageIndexedDB>(dbOptions),
+    []
+  );
+  const campaignDB = useMemo(
+    () => new IndexedDBCrud<ICampaignDB>(dbCampaignOpts),
+    []
+  );
+  const { category, label } = template;
+
+  // Add missing variable declarations
   const campaignName = localStorage.getItem("campaignName");
   const pageName = localStorage.getItem("pageName");
-  // Set isNewsLetter (Campaign) to true if orgsId exist else false
-  localStorage.setItem("isNewsLetter", orgsId && orgsNum ? "true" : "false");
-  if (!initialized) localStorage.setItem("initialized", "false");
-  const goBackURL = (isModal = false) =>
-    isNewsLetter
-      ? `/organization/${orgsId}/new-campaign/${pageId}${
-          isModal ? `?modal=true&orgsNum=${orgsNum}` : `?orgsNum=${orgsNum}`
-        }`
-      : "/pages/1";
+  const { isSaving, isError } = storeSaved;
 
-  usePageMetadata({
-    title: "Editor",
-    description: "Drag and drop to create site",
-  });
+  // Initialize htmlData directly if category and label exist
+  const initialHtmlData =
+    category && label
+      ? (
+          (isNewsLetter ? emailTempData : templateData) as unknown as {
+            [key: string]: Record<string, TemplateEntry>;
+          }
+        )[category][label].content
+      : null;
 
-  const ToCaptureRef = useRef<HTMLDivElement>(null);
+  const [htmlData, setHtmlData] = useState<Record<string, string> | null>(
+    initialHtmlData
+  );
 
-  const captureScreenshot = async (): Promise<Blob | null> => {
+  // Memoized callbacks
+  const goBackURL = useCallback(
+    (isModal = false) =>
+      isNewsLetter
+        ? `/organization/${orgsId}/new-campaign/${pageId}${
+            isModal ? `?modal=true&orgsNum=${orgsNum}` : `?orgsNum=${orgsNum}`
+          }`
+        : "/pages/1",
+    [isNewsLetter, orgsId, pageId, orgsNum]
+  );
+
+  // Keep the useEffect for updates
+  useEffect(() => {
+    if (category && label) {
+      const tempData = (
+        (isNewsLetter ? emailTempData : templateData) as unknown as {
+          [key: string]: Record<string, TemplateEntry>;
+        }
+      )[category][label];
+      setHtmlData(tempData.content);
+    }
+  }, [category, label, isNewsLetter]);
+
+  // Move pageId check into useEffect
+  useEffect(() => {
+    if (!pageId) {
+      navigate(goBackURL());
+    }
+  }, [pageId, navigate, goBackURL]);
+
+  // Memoized callbacks
+  const handleManager = useCallback((key: keyof ManagerState) => {
+    setManager((prevState) => {
+      const newState: ManagerState = Object.keys(prevState).reduce(
+        (acc, curr) => {
+          acc[curr as keyof ManagerState] = false;
+          return acc;
+        },
+        {} as ManagerState
+      );
+      newState[key] = true;
+      return newState;
+    });
+  }, []);
+
+  const handleOpen = useCallback(
+    (name: "panelRight" | "panelLeft") =>
+      setBuilder((prevState) => ({ ...prevState, [name]: true })),
+    []
+  );
+
+  const handleClose = useCallback((name: "panelRight" | "panelLeft") => {
+    setIsExiting((prevState) => ({ ...prevState, [name]: true }));
+    setTimeout(() => {
+      setIsExiting((prevState) => ({ ...prevState, [name]: false }));
+      setBuilder((prevState) => ({ ...prevState, [name]: false }));
+    }, 500);
+  }, []);
+
+  const handleOnChange = useCallback((evt: ChangeEvent<HTMLInputElement>) => {
+    const { value, name } = evt.target;
+    setTextValue((prevState) => ({ ...prevState, [name]: value }));
+  }, []);
+
+  // Memoized functions
+  const captureScreenshot = useCallback(async (): Promise<Blob | null> => {
     if (!editor) return null;
 
     const html = editor.getHtml();
     const css = editor.getCss();
     const initTempData = await initialTemplateLoad();
 
-    // Get a page by key
     const page = await pageDB.get(`mlrPage-${pageId}`);
     const campaign = await campaignDB.get(`mlrCampaign-${pageId}`);
     const canvasData = (isNewsLetter ? campaign : page)?.canvasData;
@@ -142,7 +330,7 @@ const CustomEditor: React.FC = () => {
       iframe.style.width = "900px";
       iframe.style.height = "700px";
       iframe.style.position = "absolute";
-      iframe.style.top = "-999px"; // Keep it off-screen initially
+      iframe.style.top = "-999px";
       document.body.appendChild(iframe);
 
       const iframeDoc =
@@ -163,7 +351,7 @@ const CustomEditor: React.FC = () => {
 
             canvas.toBlob((blob) => {
               document.body.removeChild(iframe);
-              resolve(blob || null); // Resolve with Blob or null
+              resolve(blob || null);
             }, "image/png");
           }, 1000);
         };
@@ -171,25 +359,20 @@ const CustomEditor: React.FC = () => {
         resolve(null);
       }
     });
-  };
+  }, [editor, pageId, isNewsLetter, pageDB, campaignDB]);
 
-  // Check if Template was Selected
-  if (category && label) {
-    const tempData = (
-      (isNewsLetter ? emailTempData : templateData) as unknown as {
-        [key: string]: Record<string, TemplateEntry>;
-      }
-    )[category][label];
+  usePageMetadata({
+    title: "Create pages",
+    description: "Develop your pages with ease using our custom editor.",
+  });
 
-    htmlData = tempData.content;
-  }
+  // Memoize handlers that depend on state
+  const handleOnSave = useCallback(async () => {
+    if (!editor) return;
+    await updateDataToDB(editor);
+  }, [editor]);
 
-  if (!pageId) {
-    navigate(goBackURL());
-    return;
-  }
-
-  const handleOnDone = async () => {
+  const handleOnDone = useCallback(async () => {
     if (editor) {
       await updateDataToDB(editor);
       navigate(goBackURL(false));
@@ -216,25 +399,178 @@ const CustomEditor: React.FC = () => {
         }
       });
     }
-  };
+  }, [editor, navigate, goBackURL, step, category, label, isNewsLetter]);
 
-  const handleManager = (key: keyof ManagerState) => {
-    setManager((prevState) => {
-      // Create a new state with all keys set to false
-      const newState: ManagerState = Object.keys(prevState).reduce(
-        (acc, curr) => {
-          acc[curr as keyof ManagerState] = false;
-          return acc;
-        },
-        {} as ManagerState
-      );
+  const publishPage = useCallback(async () => {
+    if (editor) {
+      const html = editor.getHtml();
+      const css = editor.getCss();
+      const initTempData = await initialTemplateLoad();
 
-      // Set the selected key to true
-      newState[key] = true;
+      const page = await pageDB.get(`mlrPage-${pageId}`);
+      const campaign = await campaignDB.get(`mlrCampaign-${pageId}`);
+      const canvasData = (isNewsLetter ? campaign : page)?.canvasData;
+      const newWindow = window.open("", "_blank");
 
-      return newState;
-    });
-  };
+      if (newWindow) {
+        const content = contentHTML({
+          html,
+          css,
+          showIcon: true,
+          showScripts: true,
+          showTailwindScript: true,
+          canvasData,
+          initTempData,
+        });
+        newWindow.document.write(content);
+        newWindow.document.close();
+      } else {
+        alert("Popup blocked! Please allow popups for this website!");
+      }
+    }
+  }, [editor, pageId, isNewsLetter, pageDB, campaignDB]);
+
+  // Memoize updateDataToDB
+  const updateDataToDB = useCallback(
+    async (editor: Editor) => {
+      setIsLoadingUpd(true);
+      setShowIsLoading(false);
+
+      try {
+        // Extract HTML, CSS, and project data with null checks
+        const html = editor.getHtml()?.trim() || "";
+        const css = editor.getCss()?.trim() || "";
+        const projectData = editor.getProjectData() || {};
+
+        // Fetch API response based on `isNewsLetter`
+        const resp = isNewsLetter
+          ? await ShowCampaignAPI(orgsNum ?? orgID, pageId ?? "")
+          : await GetPageTemplateAPI(pageId ?? "");
+
+        // Handle API failure cases
+        const errResp =
+          (resp as any)?.response && (resp as any)?.response?.status >= 300;
+
+        // Handle error cases early
+        if (
+          !resp ||
+          errResp ||
+          (resp as unknown as { message: string })?.message ===
+            "Looks like something went wrong" ||
+          (resp as string) === "No Campaign Activities"
+        ) {
+          navigate(goBackURL());
+          return;
+        }
+
+        // Fetch campaign data with null checks
+        const campaign = await campaignDB.get(`mlrCampaign-${pageId ?? ""}`);
+        const page = await pageDB.get(`mlrPage-${pageId ?? ""}`);
+        const campDataResp = (resp as ICampaignResp)?.attributes ?? {};
+        const pageDataResp =
+          (resp as IGetPageTemplateResp)?.data?.attributes ?? {};
+
+        // Load initial data & capture screenshot
+        const initialData = await initialTemplateLoad();
+        const screenshotBlob = await captureScreenshot();
+        const response = await fetch("/placeholder.png");
+        const altScreenshotBlob = await response.blob();
+        const screenshot = screenshotBlob || altScreenshotBlob;
+
+        // Strip data safely with null checks
+        const remotePageContent = stripQuotes(pageDataResp?.content ?? "");
+        const remotePageCanvas = stripQuotes(pageDataResp?.canvasData ?? "");
+        const remoteCampaignCanvas = stripQuotes(
+          campDataResp.email_builder?.attributes?.canvasData ?? ""
+        );
+        const remoteCampaignContent = stripQuotes(
+          campDataResp.email_builder?.attributes?.content ?? ""
+        );
+
+        // Determine content & canvas based on `isNewsLetter` with null checks
+        let canvasData = isNewsLetter
+          ? campaign?.canvasData || remoteCampaignCanvas || {}
+          : page?.canvasData || remotePageCanvas || {};
+
+        let content = isNewsLetter
+          ? campaign?.content ||
+            remoteCampaignContent || { html: "", css: "", headContent: "" }
+          : page?.content ||
+            remotePageContent || { html: "", css: "", headContent: "" };
+
+        content = stripQuotes(content);
+        canvasData = stripQuotes(canvasData);
+
+        // Store data with null checks
+        const storeData = await editor.StorageManager.store({
+          ...projectData,
+          ...(isNewsLetter ? { campaignId: pageId } : { pageId }),
+          userId: user.id,
+          screenshot,
+          canvasData,
+          isInitialSave: isNewsLetter ? !!campaign : !!pageDataResp?.pageId,
+          headContent: content?.headContent || "",
+        });
+
+        // Extract stored data with null checks
+        const {
+          headContent = "",
+          isInitialSave = false,
+          screenshot: scr, // Ignore screenshot in stored data
+          ...rest
+        } = storeData || {};
+
+        // Redirect if storeData is empty
+        if (!storeData) return navigate(goBackURL());
+
+        // Determine database keys
+        const pageID = `mlrPage-${pageId}`;
+        const campaignID = `mlrCampaign-${pageId}`;
+        const endpoint = isNewsLetter ? campaignID : pageID;
+        const { email_builder, ...restCampaignData } = campDataResp;
+
+        // Update Campaign DB (if Newsletter) with null checks
+        if (isNewsLetter) {
+          await campaignDB.update(endpoint, {
+            ...(rest as ICampaignDB),
+            content: {
+              html: html || "",
+              css: css || "",
+              headContent: content?.headContent || "",
+            },
+            campaign: restCampaignData,
+          });
+          return;
+        }
+
+        // Update Page DB (if Not Newsletter) with null checks
+        await pageDB.update(endpoint, {
+          ...(rest as IPageIndexedDB),
+          content: {
+            html: html || "",
+            css: css || "",
+            headContent: content?.headContent || "",
+          },
+        });
+      } catch (error) {
+        console.error("Error updating data to DB:", error);
+      } finally {
+        setIsLoadingUpd(false);
+      }
+    },
+    [
+      pageId,
+      isNewsLetter,
+      orgsNum,
+      orgID,
+      navigate,
+      goBackURL,
+      pageDB,
+      campaignDB,
+      user.id,
+      editor,
+    ]
+  );
 
   const adjustRtePosition = () => {
     const rteToolbar = document.querySelector<HTMLElement>(".gjs-rte-toolbar");
@@ -256,7 +592,12 @@ const CustomEditor: React.FC = () => {
 
   const initialTemplateLoad = async () => {
     // Fetch the HTML and extract styles/scripts before initializing GrapesJS
-    if (htmlData) {
+    if (!htmlData) {
+      console.warn("htmlData is not yet loaded");
+      return undefined;
+    }
+
+    try {
       const response = await fetch(htmlData["home"]);
       const html = await response.text();
       const parser = new DOMParser();
@@ -284,12 +625,15 @@ const CustomEditor: React.FC = () => {
       ).map((script) => (script as HTMLScriptElement).src);
 
       return {
-        headContent,
         bodyContent,
+        headContent,
         inlineStyles,
         externalLinks,
         externalScripts,
       };
+    } catch (error) {
+      console.error("Error loading template:", error);
+      return undefined;
     }
   };
 
@@ -454,144 +798,23 @@ const CustomEditor: React.FC = () => {
     }
   };
 
-  const handleOnChange = (evt: ChangeEvent<HTMLInputElement>) => {
-    const { value, name } = evt.target;
-    setTextValue((prevState) => ({ ...prevState, [name]: value }));
-  };
-
   const canvasClear = (editor: Editor) => {
     editor.DomComponents.clear();
     editor.CssComposer.clear();
   };
 
-  const loadPageGrapesJs = async () => {
-    try {
-      // Fetch the appropriate API response based on `isNewsLetter`
-      const resp = isNewsLetter
-        ? await ShowCampaignAPI(orgsNum || orgID, pageId)
-        : await GetPageTemplateAPI(pageId);
+  // Add loading state
+  const [isEditorLoading, setIsEditorLoading] = useState(true);
 
-      const campaign = await campaignDB.get(`mlrCampaign-${pageId}`);
-      const assetResp = await GetAllBuilderUploadAPI();
-
-      const errResp =
-        (resp as any)?.response && (resp as any)?.response?.status >= 300;
-
-      // Handle error cases early
-      if (
-        !resp ||
-        errResp ||
-        (resp as unknown as { message: string })?.message ===
-          "Looks like something went wrong" ||
-        (resp as string) === "No Campaign Activities"
-      ) {
-        navigate(goBackURL());
-        return;
-      }
-
-      // Extract attributes safely
-      const campData = (resp as ICampaignResp)?.attributes ?? {};
-      const pageData = (resp as IGetPageTemplateResp)?.data?.attributes ?? {};
-
-      localStorage.setItem("campaignName", campData.title);
-
-      // Strip quotes from content
-      const strippedCanvas = stripQuotes(pageData.canvasData);
-      const strippedContent = stripQuotes(pageData.content);
-      const strippedCampaignCanvas = stripQuotes(
-        campData.email_builder?.attributes.canvasData
-      );
-      const strippedCampaignContent = stripQuotes(
-        campData.email_builder?.attributes.content
-      );
-
-      // Determine canvas & content based on `isNewsLetter`
-      const canvasData = isNewsLetter
-        ? strippedCampaignCanvas || campaign?.canvasData
-        : strippedCanvas;
-
-      let content = isNewsLetter
-        ? strippedCampaignContent || campaign?.content
-        : strippedContent;
-
-      content = stripQuotes(content);
-
-      // Initialize external styles and scripts
-      const initExtData = {
-        styles: canvasData?.styles || [],
-        scripts: canvasData?.scripts || [],
-      };
-
-      // Configure GrapesJS
-      const config = GrapesjsConfig(
-        isNewsLetter,
-        pageId,
-        user.id,
-        orgsNum || orgID,
-        {
-          content: {
-            html: content?.html || "",
-            css: content?.css || "",
-            headContent: content?.headContent || "",
-          },
-        },
-        assetResp || [],
-        initExtData
-      );
-
-      // Extend the canvas settings
-      const canvasObj = {
-        ...config.canvas,
-        styles: canvasData?.styles || [],
-        scripts: canvasData?.scripts || [],
-      };
-
-      // Initialize GrapesJS editor
-      const editorInstance = grapesjs.init({
-        ...config,
-        canvas: canvasObj,
-      });
-
-      setEditor(editorInstance);
-
-      // Register plugins and extensions
-      addCommands(editorInstance);
-      actionEvents(editorInstance);
-      addRTE(editorInstance);
-      customPlugin(editorInstance);
-      imageUploader(editorInstance);
-
-      // Load content into the editor if available
-      if (content?.html && content?.css) {
-        editorInstance.setComponents(
-          content.html.toString().replace(/\\n/g, "").trim()
-        );
-        editorInstance.setStyle(
-          content.css.toString().replace(/\\n/g, "").trim()
-        );
-      }
-
-      // Store state in local storage
-      localStorage.setItem("isGetPageTemplate", "true");
-
-      // Scroll to selected component smoothly
-      const canvas = editorInstance.Canvas;
-      const selected = editorInstance.getSelected();
-      canvas.scrollTo(selected, { behavior: "smooth" });
-      canvas.scrollTo(selected, { force: true });
-    } catch (error) {
-      console.error("Error loading GrapesJS:", error);
-    }
-  };
-
-  // Initialize GrapesJS
+  // Modify loadGrapesJs to handle loading state
   const loadGrapesJs = async () => {
     try {
+      setIsEditorLoading(true);
       const initialized = localStorage.getItem("initialized");
 
       if (initialized === "false") {
         setShowIsLoading(true);
-        loadPageGrapesJs();
+        await loadPageGrapesJs();
         return;
       }
 
@@ -608,7 +831,7 @@ const CustomEditor: React.FC = () => {
 
       const config = GrapesjsConfig(
         isNewsLetter,
-        pageId,
+        pageId || "",
         user.id,
         orgsNum || orgID,
         {
@@ -660,25 +883,24 @@ const CustomEditor: React.FC = () => {
       canvas.scrollTo(selected, { force: true });
     } catch (error) {
       console.error("Failed to fetch canvas data:", error);
+    } finally {
+      setIsEditorLoading(false);
     }
   };
 
-  const updateDataToDB = async (editor: Editor) => {
-    setIsLoadingUpd(true);
-    setShowIsLoading(false);
-
+  // Modify loadPageGrapesJs to handle loading state
+  const loadPageGrapesJs = async () => {
     try {
-      // Extract HTML, CSS, and project data
-      const html = editor.getHtml();
-      const css = editor.getCss();
-      const projectData = editor.getProjectData();
-
-      // Fetch API response based on `isNewsLetter`
+      setIsEditorLoading(true);
+      // Fetch the appropriate API response based on `isNewsLetter`
       const resp = isNewsLetter
-        ? await ShowCampaignAPI(orgsNum || orgID, pageId)
-        : await GetPageTemplateAPI(pageId);
+        ? await ShowCampaignAPI(orgsNum ?? orgID, pageId ?? "")
+        : await GetPageTemplateAPI(pageId ?? "");
 
-      // Handle API failure cases
+      const campaign = await campaignDB.get(`mlrCampaign-${pageId ?? ""}`);
+      const page = await pageDB.get(`mlrPage-${pageId ?? ""}`);
+      const assetResp = await GetAllBuilderUploadAPI();
+
       const errResp =
         (resp as any)?.response && (resp as any)?.response?.status >= 300;
 
@@ -694,117 +916,118 @@ const CustomEditor: React.FC = () => {
         return;
       }
 
-      // Fetch campaign data
-      const campaign = await campaignDB.get(`mlrCampaign-${pageId}`);
-      const campDataResp = (resp as ICampaignResp)?.attributes ?? {};
-      const pageDataResp =
-        (resp as IGetPageTemplateResp)?.data?.attributes ?? {};
+      // Extract attributes safely
+      const campData = (resp as ICampaignResp)?.attributes ?? {};
+      const pageData = (resp as IGetPageTemplateResp)?.data?.attributes ?? {};
 
-      // Load initial data & capture screenshot
-      const initialData = await initialTemplateLoad();
-      const screenshotBlob = await captureScreenshot();
-      const response = await fetch("/placeholder.png");
-      const altScreenshotBlob = await response.blob();
-      const screenshot = screenshotBlob || altScreenshotBlob;
+      const newtxt = "New Campaign";
+      const txtId = pageId?.slice(0, 5);
+      const campTitle =
+        stripQuotes(campData.title) === newtxt
+          ? `${newtxt} ${txtId}`
+          : campData.title;
+      localStorage.setItem("campaignName", campTitle);
 
-      // Strip data safely
-      const strippedContent = stripQuotes(pageDataResp?.content);
-      const strippedCanvas = stripQuotes(pageDataResp?.canvasData);
-      const strippedCampaignCanvas = stripQuotes(
-        campDataResp.email_builder?.attributes.canvasData
+      // Strip quotes from content
+      const remotePageCanvas = stripQuotes(pageData.canvasData);
+      const remotePageContent = stripQuotes(pageData.content);
+      const remoteCampaignCanvas = stripQuotes(
+        campData.email_builder?.attributes.canvasData
       );
-      const strippedCampaignContent = stripQuotes(
-        campDataResp.email_builder?.attributes.content
+      const remoteCampaignContent = stripQuotes(
+        campData.email_builder?.attributes.content
       );
 
-      // Determine content & canvas based on `isNewsLetter`
-      const canvasData = isNewsLetter
-        ? strippedCampaignCanvas || campaign?.canvasData
-        : strippedCanvas;
+      // Determine canvas & content based on `isNewsLetter`
+      let canvasData = isNewsLetter
+        ? campaign?.canvasData || remoteCampaignCanvas || {}
+        : page?.canvasData || remotePageCanvas || {};
 
       let content = isNewsLetter
-        ? strippedCampaignContent || campaign?.content
-        : strippedContent;
+        ? campaign?.content ||
+          remoteCampaignContent || { html: "", css: "", headContent: "" }
+        : page?.content ||
+          remotePageContent || { html: "", css: "", headContent: "" };
 
       content = stripQuotes(content);
+      canvasData = stripQuotes(canvasData);
 
-      // Store data
-      const storeData = await editor.StorageManager.store({
-        ...projectData,
-        ...(isNewsLetter ? { campaignId: pageId } : { pageId }),
-        userId: user.id,
-        screenshot,
-        canvasData,
-        isInitialSave: isNewsLetter ? !!campaign : !!pageDataResp?.pageId,
-        headContent: content?.headContent || "",
+      console.log("content <====>", content);
+      console.log("canvasData <====>", canvasData);
+
+      // Initialize external styles and scripts
+      const initExtData = {
+        styles: canvasData?.styles || [],
+        scripts: canvasData?.scripts || [],
+      };
+
+      // Configure GrapesJS
+      const config = GrapesjsConfig(
+        isNewsLetter,
+        pageId || "",
+        user.id,
+        orgsNum || orgID,
+        {
+          content: {
+            html: content?.html || "",
+            css: content?.css || "",
+            headContent: content?.headContent || "",
+          },
+        },
+        assetResp || [],
+        initExtData
+      );
+
+      // Extend the canvas settings
+      const canvasObj = {
+        ...config.canvas,
+        styles: canvasData?.styles || [],
+        scripts: canvasData?.scripts || [],
+      };
+
+      // Initialize GrapesJS editor
+      const editorInstance = grapesjs.init({
+        ...config,
+        canvas: canvasObj,
       });
 
-      // Extract stored data
-      const {
-        headContent,
-        isInitialSave,
-        screenshot: scr, // Ignore screenshot in stored data
-        ...rest
-      } = storeData;
+      setEditor(editorInstance);
 
-      // Redirect if storeData is empty
-      if (!storeData) return navigate(goBackURL());
+      // Register plugins and extensions
+      addCommands(editorInstance);
+      actionEvents(editorInstance);
+      addRTE(editorInstance);
+      customPlugin(editorInstance);
+      imageUploader(editorInstance);
 
-      // Determine database keys
-      const pageID = `mlrPage-${pageId}`;
-      const campaignID = `mlrCampaign-${pageId}`;
-      const endpoint = isNewsLetter ? campaignID : pageID;
-      const { email_builder, ...restCampaignData } = campDataResp;
+      const remoteContent = extractRionContent(content.toString());
+      console.log("CONTENT <=============> ", content);
+      console.log("REMOTE CONTENT <=============> ", remoteContent);
 
-      // Update Campaign DB (if Newsletter)
-      if (isNewsLetter) {
-        await campaignDB.update(endpoint, {
-          ...(rest as ICampaignDB),
-          content: {
-            html,
-            css,
-            headContent:
-              initialData?.headContent ||
-              content?.headContent ||
-              campaign?.content?.headContent ||
-              "",
-          },
-          campaign: restCampaignData,
-        });
-        return;
+      // Load content into the editor if available
+      if ((content?.html) && content?.css) {
+        editorInstance.setComponents(content.html.replace(/\\/g, ""));
+        editorInstance.setStyle(content.css.replace(/\\/g, ""));
       }
 
-      // Update Page DB (if Not Newsletter)
-      await pageDB.update(endpoint, {
-        ...(rest as IPageIndexedDB),
-        content: {
-          html,
-          css,
-          headContent: initialData?.headContent || content?.headContent || "",
-        },
-      });
+      if ((content?.RIONHTML) && content?.RIONCSS) {
+        editorInstance.setComponents(content.RIONHTML.replace(/\\/g, ""));
+        editorInstance.setStyle(content.RIONCSS.replace(/\\/g, ""));
+      }
+
+      // Store state in local storage
+      localStorage.setItem("isGetPageTemplate", "true");
+
+      // Scroll to selected component smoothly
+      const canvas = editorInstance.Canvas;
+      const selected = editorInstance.getSelected();
+      canvas.scrollTo(selected, { behavior: "smooth" });
+      canvas.scrollTo(selected, { force: true });
     } catch (error) {
-      console.error("Error updating data to DB:", error);
+      console.error("Error loading GrapesJS:", error);
     } finally {
-      setIsLoadingUpd(false);
+      setIsEditorLoading(false);
     }
-  };
-
-  const handleOnSave = async () => {
-    if (!editor) return;
-    updateDataToDB(editor);
-  };
-
-  // Set the open state for panels
-  const handleOpen = (name: "panelRight" | "panelLeft") =>
-    setBuilder((prevState) => ({ ...prevState, [name]: true }));
-
-  const handleClose = (name: "panelRight" | "panelLeft") => {
-    setIsExiting((prevState) => ({ ...prevState, [name]: true }));
-    setTimeout(() => {
-      setIsExiting((prevState) => ({ ...prevState, [name]: false }));
-      setBuilder((prevState) => ({ ...prevState, [name]: false }));
-    }, 500);
   };
 
   const addRTE = (editor: Editor) => {
@@ -1098,42 +1321,25 @@ const CustomEditor: React.FC = () => {
     });
   };
 
+  // Cleanup effect
+  useEffect(() => {
+    return () => {
+      if (editor) {
+        editor.destroy();
+      }
+    };
+  }, [editor]);
+
+  // Initial load effect
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
-      loadGrapesJs();
+      loadGrapesJs().catch(error => {
+        console.error('Failed to initialize GrapesJS:', error);
+        // You might want to set some error state here
+      });
     }
-  }, [editor]);
-
-  const publishPage = async () => {
-    if (editor) {
-      const html = editor.getHtml();
-      const css = editor.getCss();
-      const initTempData = await initialTemplateLoad();
-
-      // Get a page by key
-      const page = await pageDB.get(`mlrPage-${pageId}`);
-      const campaign = await campaignDB.get(`mlrCampaign-${pageId}`);
-      const canvasData = (isNewsLetter ? campaign : page)?.canvasData;
-      const newWindow = window.open("", "_blank");
-
-      if (newWindow) {
-        const content = contentHTML({
-          html,
-          css,
-          showIcon: true,
-          showScripts: true,
-          showTailwindScript: true,
-          canvasData,
-          initTempData,
-        });
-        newWindow.document.write(content);
-        newWindow.document.close();
-      } else {
-        alert("Popup blocked! Please allow popups for this website!");
-      }
-    }
-  };
+  }, []); // Remove editor dependency
 
   const sendTestEmail = async () => {
     try {
@@ -1177,60 +1383,21 @@ ${editor.getHtml().trim()}
 
   return (
     <div>
-      {/* Top Panel */}
-      <div className="panel__top">
-        <div>
-          <h5 className="page_title">
-            {isNewsLetter
-              ? stripQuotes(campaignName)
-              : stripQuotes(pageName) || "PageName"}
-          </h5>
-          <div className="panel__switcher"></div>
-        </div>
-        <div className="gjs-panel-action-buttons">
-          <div className="views-actions"></div>
-        </div>
-        <div className="panel-action">
-          {(isSaving || (isLoadingGet && showIsLoading)) && !isLoadingUpd && (
-            <div className="saving">
-              <BsArrowRepeat fontSize={18} />{" "}
-              <span>{isSaving ? "Saving..." : "Loading..."}</span>
-            </div>
-          )}
-          {(isError.load || isError.store || errorLoading) && (
-            <div className="error">
-              <MdOutlineErrorOutline fontSize={18} />
-              <span>
-                Error{" "}
-                {isError.load
-                  ? "loading"
-                  : isError.store
-                  ? "saving"
-                  : "loading"}
-              </span>
-            </div>
-          )}
-          <button
-            className="btn btn-primary"
-            disabled={isLoadingPage || isLoadingUpd}
-            onClick={handleOnSave}
-          >
-            {isLoadingPage || isLoadingUpd ? "Updating..." : "Save"}
-          </button>
-          <button
-            className="btn btn-primary-outline"
-            disabled={isLoadingUpd}
-            onClick={handleOnDone}
-          >
-            Done
-          </button>
-          {!isNewsLetter && (
-            <button className="btn btn-primary" onClick={publishPage}>
-              Publish
-            </button>
-          )}
-        </div>
-      </div>
+      <PanelTop
+        isNewsLetter={isNewsLetter}
+        campaignName={campaignName}
+        pageName={pageName}
+        isSaving={isSaving}
+        isLoadingGet={isLoadingGet}
+        showIsLoading={showIsLoading}
+        isLoadingUpd={isLoadingUpd}
+        isError={isError}
+        errorLoading={errorLoading}
+        isLoadingPage={isLoadingPage}
+        handleOnSave={handleOnSave}
+        handleOnDone={handleOnDone}
+        publishPage={publishPage}
+      />
       <div className="editor-row ml-4">
         {/* Overlay Arrow Left Expand Button */}
         <div
@@ -1268,12 +1435,12 @@ ${editor.getHtml().trim()}
 
         {/* Canvas */}
         <div ref={ToCaptureRef} className="editor-canvas">
-          {!editor && (
+          {(!editor || isEditorLoading) && (
             <div className="loader">
               <ButtonSpinner />
             </div>
           )}
-          <div id="gjs" style={{ display: editor ? "block" : "none" }} />
+          <div id="gjs" style={{ display: editor && !isEditorLoading ? "block" : "none" }} />
         </div>
 
         {/* Right Panel */}

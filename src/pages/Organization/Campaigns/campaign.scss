@@ -253,7 +253,7 @@
       img {
         height: 100%;
         width: 100%;
-        object-fit: fill;
+        object-fit: contain !important;
         pointer-events: none;
         overflow: hidden;
         border: none;

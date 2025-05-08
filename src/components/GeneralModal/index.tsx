@@ -9,6 +9,7 @@ interface IModalProps {
   subTitle?: string;
   children: React.ReactNode;
   handleClose: () => void;
+  maxWidth?: string;
 }
 
 /**
@@ -35,6 +36,7 @@ const GeneralModal = ({
   title,
   width,
   subTitle,
+  maxWidth,
 }: IModalProps) => {
   const { theme } = useAppSelector((state) => state.utils);
 
@@ -64,6 +66,7 @@ const GeneralModal = ({
         style={{
           width: width,
           height: height,
+          maxWidth: maxWidth,
         }}
       >
         <div className="body__wrap">

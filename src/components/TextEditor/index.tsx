@@ -84,7 +84,7 @@ const TextEditor = ({ onChange, loadBody, value }: Props) => {
   return (
     <ReactQuill
       value={value}
-      style={{ height: "100%" }}
+      style={{ pointerEvents: "auto" }}
       onChange={handleEditorChange}
       modules={modules}
       formats={formats}

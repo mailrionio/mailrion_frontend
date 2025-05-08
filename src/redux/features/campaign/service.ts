@@ -36,6 +36,7 @@ export interface IViewCampaignData {
     title: string;
     subject: string;
     created_on: string;
+    updated_on: null | string;
     screenshot: null | IScreenshotData;
     status: string;
   };

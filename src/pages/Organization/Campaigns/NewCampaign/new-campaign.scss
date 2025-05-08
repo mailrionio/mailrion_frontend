@@ -145,6 +145,10 @@
         border: 1px solid var(--border-color);
         margin: 0.8rem 0;
 
+        &:hover {
+          border-color: var(--primary-color);
+        }
+
         .iframeLoader {
           position: absolute;
           margin: 0 auto;
@@ -190,7 +194,22 @@
       .text-editor {
         min-height: 60vh;
         margin-top: 1rem;
-        border: 1px solid var(--border-color);
+        outline: 1px solid var(--border-color);
+        margin-bottom: 6px;
+        overflow: auto;
+
+        &:focus-within {
+          outline-color: var(--primary-color) !important;
+          outline-width: 2px !important;
+        }
+        &:hover {
+          outline-color: var(--primary-color) !important;
+        }
+      }
+
+      .text-editor .ql-editor {
+        min-height: 60vh !important;
+        margin-top: 1rem;
         margin-bottom: 6px;
         overflow: auto;
       }
@@ -199,7 +218,7 @@
         display: flex;
         flex-wrap: wrap;
         width: max-content;
-        margin-top: 0.5rem;
+        margin-top: 1rem;
 
         .gen-group {
           display: flex;
@@ -248,10 +267,16 @@
         font-style: normal;
         font-weight: 500;
         margin-bottom: 8px;
+
+        .required {
+          color: red;
+        }
       }
       select {
         border-radius: 8px;
-        border: 1px solid var(--border-color);
+        border: none;
+        margin-top: 0.5rem;
+        outline: 1px solid var(--border-color);
         background: var(--background) !important;
         color: var(--text-color);
         display: flex;
@@ -261,7 +286,14 @@
         gap: 8px;
         /* Shadow/xs */
         box-shadow: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
-        outline: 0;
+
+        &:focus-within {
+          outline-color: var(--primary-color) !important;
+          outline-width: 2px !important;
+        }
+        &:hover {
+          outline-color: var(--primary-color) !important;
+        }
       }
     }
   }

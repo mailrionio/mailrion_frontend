@@ -3,7 +3,7 @@ import { GetListsAPI } from "@/redux/features/ListManagement/services";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import usePageMetadata from "../../../components/UsePageMetadata";
 import CustomPagination from "@/components/CustomPagination";
-import { Fragment, memo, useEffect, useState } from "react";
+import { Fragment, memo, useCallback, useEffect, useMemo, useState } from "react";
 import { setPageSearch } from "@/redux/features/utilSlice";
 import { dispatch, useAppSelector } from "@/redux/store";
 import FilterOptions from "@/components/FilterOptions";
@@ -28,23 +28,35 @@ import {
 } from "@/helpers/indexedbd.helper";
 import "./campaign.scss";
 
+// Constants
+const CACHE_PREFIX = {
+  CAMPAIGNS: 'campaigns',
+  LISTS: 'lists'
+};
+
+const ITEMS_PER_PAGE = 16;
+
 const Campaigns = () => {
   const { id } = useParams<{ id: string }>();
-  const [campaigns, setCampaigns] = useState<IViewCampaigns>();
-  const { searchQuery } = useAppSelector((state) => state.utils);
-  const [loadCampaigns, setLoadCampaigns] = useState<boolean>(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const campaignDB = useMemo(() => new IndexedDBCrud<ICampaignDB>(dbCampaignOpts), []);
+
+  // Redux state
   const { admin: user } = useAppSelector((state) => state.user);
-  const campaignDB = new IndexedDBCrud<ICampaignDB>(dbCampaignOpts);
   const {
     selectedOrganization: { id: orgID, primaryMember },
   } = useAppSelector((state) => state.organization);
+
+  // Local state
+  const [campaigns, setCampaigns] = useState<IViewCampaigns>();
+  const [loadCampaigns, setLoadCampaigns] = useState<boolean>(false);
   const [campaignData, setCampaignData] = useState<ICampaignDB[]>([]);
   const [campaign, setIsCampaign] = useState<IViewCampaignData>();
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingSave, setLoadingSave] = useState(false);
   const [yesDelete, setYesDelete] = useState<boolean>(false);
-  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [meta, setMeta] = useState<IViewCampaigns["meta"]>({
     current_page: 1,
@@ -52,17 +64,18 @@ const Campaigns = () => {
     last_page: 1,
     links: [],
     path: "",
-    per_page: 16,
-    to: 16,
+    per_page: ITEMS_PER_PAGE,
+    to: ITEMS_PER_PAGE,
     total: 0,
   });
-  const totalPgs = Math.ceil(meta.total / meta.per_page);
-  const [hasOnePage, setHasOnePage] = useState(totalPgs <= 1);
-  const location = useLocation();
 
-  // Utility function to parse query parameters
-  const getQueryParams = (query: string) => {
-    return query
+  // Derived state
+  const totalPgs = useMemo(() => Math.ceil(meta?.total / meta?.per_page), [meta?.total, meta?.per_page]);
+  const hasOnePage = useMemo(() => totalPgs <= 1, [totalPgs]);
+
+  // Parse query parameters
+  const queryParams = useMemo(() => {
+    return location.search
       .substring(1)
       .split("&")
       .reduce((acc, param) => {
@@ -70,39 +83,28 @@ const Campaigns = () => {
         acc[key] = value;
         return acc;
       }, {} as Record<string, string>);
-  };
+  }, [location.search]);
 
-  // Parse the query parameters
-  const queryParams = getQueryParams(location.search);
+  const [selectedOption, setSelectedOption] = useState(queryParams.filter || "all");
 
-  // State initialization
-  const [selectedOption, setSelectedOption] = useState(
-    queryParams.filter || "all"
-  );
-
-  // Update URL when currentPage or selectedOption changes
-  useEffect(() => {
-    const params = new URLSearchParams();
-    params.set("page", currentPage.toString());
-    params.set("filter", selectedOption.toLowerCase());
-    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
-  }, [currentPage, selectedOption, navigate, location.pathname]);
-
-  usePageMetadata({
-    title: "Campaigns | Mailrion",
-    description: "Create and manage your campaigns here",
-  });
-
-  useEffect(() => {
-    dispatch(setPageSearch({ content: "Campaigns", show: true }));
+  // Cache management
+  const getCacheKey = useCallback((type: string, ...args: any[]) => {
+    return `${type}-${args.join('-')}`;
   }, []);
 
-  const fetchCampaign = async (filterOption = "all") => {
+  const clearCache = useCallback(() => {
+    Object.keys(sessionStorage).forEach((key) => {
+      if (key.startsWith(CACHE_PREFIX.CAMPAIGNS) || key.startsWith(CACHE_PREFIX.LISTS)) {
+        sessionStorage.removeItem(key);
+      }
+    });
+  }, []);
+
+  // Data fetching
+  const fetchCampaign = useCallback(async (filterOption = "all") => {
     setLoadCampaigns(true);
 
-    const cacheKey = `campaigns-${orgID}-${filterOption}-${currentPage}`;
-    const cacheKeyData = {orgID, filterOption, currentPage};
-    sessionStorage.setItem("cacheKeyData", `${cacheKeyData}`);
+    const cacheKey = getCacheKey(CACHE_PREFIX.CAMPAIGNS, orgID, filterOption, currentPage.toString());
     const cachedData = sessionStorage.getItem(cacheKey);
 
     if (cachedData) {
@@ -126,52 +128,63 @@ const Campaigns = () => {
         };
       }
 
-      // Store fresh response in sessionStorage
       sessionStorage.setItem(cacheKey, JSON.stringify(filteredCampaigns));
-
       setCampaigns(filteredCampaigns);
       setMeta(filteredCampaigns.meta);
     } catch (error) {
       console.error("Error fetching campaigns:", error);
+      Toast({
+        type: "error",
+        message: "Failed to fetch campaigns",
+      });
     } finally {
       setLoadCampaigns(false);
     }
-  };
+  }, [orgID, currentPage, getCacheKey]);
 
-  useEffect(() => {
-    fetchCampaign();
-  }, [currentPage]);
+  const fetchLists = useCallback(async () => {
+    setIsLoading(true);
+    const cacheKey = getCacheKey(CACHE_PREFIX.LISTS, orgID);
+    const cachedData = sessionStorage.getItem(cacheKey);
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  // This logic control the main div style height
-  useEffect(() => {
-    const totalPgs = Math.ceil(meta.total / meta.per_page);
-    setHasOnePage(totalPgs <= 1);
-  }, [meta.total, meta.per_page]);
-
-  useEffect(() => {
-    if (yesDelete) {
-      fetchCampaign(selectedOption);
-
-      // Check if we deleted the last item on the current page
-      if (meta.total % meta.per_page === 1 && currentPage > 1) {
-        setCurrentPage((prev) => prev - 1);
-      }
-
-      setYesDelete(false);
+    if (cachedData) {
+      setIsLoading(false);
+      return;
     }
-  }, [yesDelete, meta.total, selectedOption]);
 
-  const saveCampaign = async () => {
+    try {
+      await GetListsAPI(orgID);
+      sessionStorage.setItem(cacheKey, 'true');
+    } catch (error) {
+      console.error("Error fetching lists:", error);
+      Toast({
+        type: "error",
+        message: "Failed to fetch lists",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [orgID, getCacheKey]);
+
+  // Event handlers
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
+  const handleOptionChange = useCallback((option: string) => {
+    const newOption = option.toLowerCase();
+    setSelectedOption(newOption);
+    fetchCampaign(newOption);
+  }, [fetchCampaign]);
+
+  const saveCampaign = useCallback(async () => {
     try {
       setLoadingSave(true);
       const userId = primaryMember.id;
       const response = await fetch("/placeholder.png");
       const screenshot = await response.blob();
       const formData = new FormData();
+      
       formData.append("name", "New Campaign");
       formData.append("subject", "Campaign Subject");
       formData.append("content", JSON.stringify(undefined));
@@ -186,13 +199,13 @@ const Campaigns = () => {
 
       const resp = await SaveCampaignAPI(formData);
 
-      if (!resp || !resp.id) return;
+      if (!resp?.id) {
+        throw new Error("Failed to create campaign");
+      }
 
       localStorage.setItem("editCampaign", "false");
-      navigate(
-        `/organization/${id}/new-campaign/${resp?.id}?page=${currentPage}`
-      );
-    } catch (error: any) {
+      navigate(`/organization/${id}/new-campaign/${resp.id}?page=${currentPage}`);
+    } catch (error) {
       Toast({
         type: "error",
         message: "Failed to create campaign",
@@ -200,37 +213,43 @@ const Campaigns = () => {
     } finally {
       setLoadingSave(false);
     }
-  };
+  }, [primaryMember.id, orgID, id, currentPage, navigate]);
 
-  const handleOnEdit = (data: IViewCampaignData) => {
+  const handleOnEdit = useCallback((data: IViewCampaignData) => {
     localStorage.setItem("editCampaign", "true");
     navigate(`/organization/${id}/new-campaign/${data.id}?page=${currentPage}`);
-  };
+  }, [id, currentPage, navigate]);
 
-  const handleOnDelete = (data: IViewCampaignData) => {
+  const handleOnDelete = useCallback((data: IViewCampaignData) => {
     setIsCampaign(data);
     setShowModal(true);
-  };
+  }, []);
 
-  const fetchLists = async () => {
-    setIsLoading(true);
+  // Effects
+  useEffect(() => {
+    dispatch(setPageSearch({ content: "Campaigns", show: true }));
+  }, []);
 
-    const cacheKey = `lists-${orgID}`;
-    const cachedData = sessionStorage.getItem(cacheKey);
+  useEffect(() => {
+    const params = new URLSearchParams();
+    params.set("page", currentPage.toString());
+    params.set("filter", selectedOption.toLowerCase());
+    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
+  }, [currentPage, selectedOption, navigate, location.pathname]);
 
-    if (cachedData) {
-      setIsLoading(false);
-      return;
+  useEffect(() => {
+    fetchCampaign(selectedOption);
+  }, [currentPage, selectedOption, fetchCampaign]);
+
+  useEffect(() => {
+    if (yesDelete) {
+      fetchCampaign(selectedOption);
+      if ((meta?.total % meta?.per_page) === 1 && currentPage > 1) {
+        setCurrentPage((prev) => prev - 1);
+      }
+      setYesDelete(false);
     }
-
-    try {
-      await GetListsAPI(orgID as string);
-    } catch (error) {
-      console.error("Error fetching lists:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [yesDelete, meta?.total, meta?.per_page, selectedOption, fetchCampaign, currentPage]);
 
   useEffect(() => {
     const getCampaigns = async () => {
@@ -240,31 +259,98 @@ const Campaigns = () => {
 
     getCampaigns();
     fetchLists();
-  }, []);
+  }, [campaignDB, fetchLists]);
 
-  // Clear Cache and Fetch Data Afresh
   useEffect(() => {
-    // If sessionStorage is empty, re-fetch campaigns and lists
-    if (!sessionStorage.getItem(`campaigns-${orgID}-all-${currentPage}`)) {
+    if (!sessionStorage.getItem(getCacheKey(CACHE_PREFIX.CAMPAIGNS, orgID, 'all', currentPage.toString()))) {
       fetchCampaign("all");
     }
 
-    if (!sessionStorage.getItem(`lists-${orgID}`)) {
+    if (!sessionStorage.getItem(getCacheKey(CACHE_PREFIX.LISTS, orgID))) {
       fetchLists();
     }
 
-    const handleRefresh = () => {
-      // Loop through sessionStorage and remove keys that start with "lists-" or "campaigns-"
-      Object.keys(sessionStorage).forEach((key) => {
-        if (key.startsWith("lists-") || key.startsWith("campaigns-")) {
-          sessionStorage.removeItem(key);
-        }
-      });
-    };
+    window.addEventListener("beforeunload", clearCache);
+    return () => window.removeEventListener("beforeunload", clearCache);
+  }, [location.pathname, orgID, currentPage, fetchCampaign, fetchLists, getCacheKey, clearCache]);
 
-    window.addEventListener("beforeunload", handleRefresh);
-    return () => window.removeEventListener("beforeunload", handleRefresh);
-  }, [location.pathname, orgID, currentPage]);
+  usePageMetadata({
+    title: "Campaigns | Mailrion",
+    description: "Create and manage your campaigns here",
+  });
+
+  // Render helpers
+  const renderCampaignGrid = useCallback(() => {
+    if (loadCampaigns) {
+      return (
+        <div className="loader">
+          <ButtonSpinner />
+        </div>
+      );
+    }
+
+    if (!campaigns?.data || campaigns.data.length === 0) {
+      return <h3 className="empty-text">No campaign created yet!</h3>;
+    }
+
+    return (
+      <ul className="gridContainer">
+        {campaigns.data.map((data, idx) => {
+          let title = stripQuotes(data.attributes.title);
+          const newtxt = "New Campaign";
+          const txtId = data.id.slice(0, 5);
+          title = title === newtxt ? `${newtxt} ${txtId}` : title;
+
+          return (
+            <Fragment key={idx}>
+              {idx === 0 && (
+                <li className="gridItem">
+                  <div className="blank">
+                    <div className="icon">
+                      <img src={alarm} alt="Alarm Icon" />
+                    </div>
+                  </div>
+                  <div className="btn-container">
+                    <Button
+                      plusIcon
+                      disabled={loadingSave}
+                      className="link"
+                      text={loadingSave ? "Creating..." : "New campaign"}
+                      onClick={saveCampaign}
+                    />
+                  </div>
+                </li>
+              )}
+              <li className="gridItem">
+                <div className="imgContainer">
+                  <img
+                    src={data?.attributes?.screenshot?.src || LandscapePlaceholder}
+                    alt="Thumbnail"
+                  />
+                  <div className="btnContainer">
+                    <button
+                      className="btnView"
+                      onClick={() => handleOnEdit(data)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="btnEdit"
+                      onClick={() => handleOnDelete(data)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+                <h4>{truncateText(title || `Untitled${idx}`, 28)}</h4>
+                <p>Opened {formatDate(data.attributes.created_on)}</p>
+              </li>
+            </Fragment>
+          );
+        })}
+      </ul>
+    );
+  }, [campaigns, loadCampaigns, loadingSave, saveCampaign, handleOnEdit, handleOnDelete]);
 
   return (
     <>
@@ -288,10 +374,7 @@ const Campaigns = () => {
           <FilterOptions
             options={["All", "Published", "Saved"]}
             activeOption={selectedOption}
-            onOptionChange={(option) => {
-              setSelectedOption(option.toLowerCase());
-              fetchCampaign(option.toLowerCase());
-            }}
+            onOptionChange={handleOptionChange}
           />
           <Button
             plusIcon
@@ -302,83 +385,14 @@ const Campaigns = () => {
           />
         </div>
         <div className="campaigns-content flex-wrap">
-          {loadCampaigns ? (
-            <div className="loader">
-              <ButtonSpinner />
-            </div>
-          ) : (
-            <ul className="gridContainer">
-              {campaigns?.data && campaigns.data.length === 0 ? (
-                <h3 className="empty-text">No campaign created yet!</h3>
-              ) : (
-                campaigns?.data &&
-                campaigns.data.map((data, idx) => {
-                  let title = stripQuotes(data.attributes.title);
-                  const newtxt = "New Campaign";
-                  const txtId = data.id.slice(0, 5);
-                  title = title === newtxt ? `${newtxt} ${txtId}` : title;
-                  return (
-                    <Fragment key={idx}>
-                      {idx === 0 && (
-                        <li className="gridItem">
-                          <div className="blank">
-                            <div className="icon">
-                              <img src={alarm} alt="Alarm Icon" />
-                            </div>
-                          </div>
-                          <div className="btn-container">
-                            <Button
-                              plusIcon
-                              disabled={loadingSave}
-                              className="link"
-                              text={
-                                loadingSave ? "Creating..." : "New campaign"
-                              }
-                              onClick={saveCampaign}
-                            />
-                          </div>
-                        </li>
-                      )}
-                      <li className="gridItem" key={idx}>
-                        <div className="imgContainer">
-                          <img
-                            src={
-                              data?.attributes?.screenshot?.src ||
-                              LandscapePlaceholder
-                            }
-                            alt={`Thumbnail`}
-                          />
-                          <div className="btnContainer">
-                            <button
-                              className="btnView"
-                              onClick={() => handleOnEdit(data)}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              className="btnEdit"
-                              onClick={() => handleOnDelete(data)}
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </div>
-                        <h4>{truncateText(title || `Untitled${idx}`, 28)}</h4>
-                        <p>Opened {formatDate(data.attributes.created_on)}</p>
-                      </li>
-                    </Fragment>
-                  );
-                })
-              )}
-            </ul>
-          )}
+          {renderCampaignGrid()}
         </div>
       </div>
 
       <CustomPagination
         currentPage={currentPage}
         totalCount={meta?.total || 0}
-        pageSize={meta?.per_page || 16}
+        pageSize={meta?.per_page || ITEMS_PER_PAGE}
         onPageChange={handlePageChange}
       />
     </>

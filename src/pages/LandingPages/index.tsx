@@ -1,3 +1,4 @@
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { GetAllPagesAPI } from "@/redux/features/PagesSlice/services";
 import { MdOutlineEdit, MdPublishedWithChanges } from "react-icons/md";
 import { formatDate, getTimeOfDay, truncateText } from "../../helpers";
@@ -13,7 +14,6 @@ import { FaListOl, FaTrashAlt } from "react-icons/fa";
 import CreateLandingPage from "./CreateLandingPage";
 import DeleteLandingPage from "./DeleteLandingPage";
 import { useAppSelector } from "../../redux/store";
-import { memo, useEffect, useState } from "react";
 import { IoGridOutline } from "react-icons/io5";
 import { HiOutlineEye } from "react-icons/hi";
 import { LandscapePlaceholder } from "@/assets";
@@ -24,138 +24,198 @@ import {
 } from "@/helpers/indexedbd.helper";
 import "./landingpages.scss";
 
+// Types
+interface ModalState {
+  create: boolean;
+  edit: boolean;
+  delete: boolean;
+}
+
+interface PageMeta {
+  perPage: number;
+  total: number;
+}
+
+// Constants
+const ITEMS_PER_PAGE = 16;
+const CACHE_PREFIX = {
+  PAGES: 'pages-',
+  META: 'meta-'
+};
+
+// Memoized Components
+const PageCard = memo(({ data, onView, onEdit, onDelete }: {
+  data: IPages;
+  onView: (pageId: string, userId: string) => void;
+  onEdit: (page: IPages) => void;
+  onDelete: (page: IPages) => void;
+}) => (
+  <li className="gridItem">
+    <div className="imgContainer">
+      <img
+        src={data.screenshot?.src || LandscapePlaceholder}
+        alt={data.pageName}
+      />
+      <div className="btnContainer">
+        <button className="btnView" onClick={() => onView(data.pageId, data.userId)}>
+          View
+        </button>
+        <button className="btnView" onClick={() => onEdit(data)}>
+          Edit
+        </button>
+        <button className="btnEdit">Publish</button>
+        <button className="btnEdit" onClick={() => onDelete(data)}>
+          Delete
+        </button>
+      </div>
+    </div>
+    <h4>{truncateText(data.pageName, 28)}</h4>
+    <p>Opened {formatDate(data.updatedDate)}</p>
+  </li>
+));
+
+const PageTable = memo(({ pages, onView, onEdit, onDelete }: {
+  pages: IPages[];
+  onView: (pageId: string, userId: string) => void;
+  onEdit: (page: IPages) => void;
+  onDelete: (page: IPages) => void;
+}) => (
+  <div className="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>S/N</th>
+          <th>Page Name</th>
+          <th>Created Date</th>
+          <th>Updated Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {pages.map((data, index) => (
+          <tr key={data.pageId}>
+            <td>{index + 1}</td>
+            <td>{data.pageName}</td>
+            <td>{formatDate(data.createdDate)}</td>
+            <td>{formatDate(data.updatedDate)}</td>
+            <td className="action-buttons">
+              <button className="view-btn" onClick={() => onView(data.pageId, data.userId)}>
+                <HiOutlineEye /> <span className="btn-text">View</span>
+              </button>
+              <button className="edit-btn" onClick={() => onEdit(data)}>
+                <MdOutlineEdit /> <span className="btn-text">Edit</span>
+              </button>
+              <button className="edit-btn">
+                <MdPublishedWithChanges /> <span className="btn-text">Publish</span>
+              </button>
+              <button className="delete-btn" onClick={() => onDelete(data)}>
+                <FaTrashAlt /> <span className="btn-text">Delete</span>
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+));
+
 const LandingPages = () => {
-  const [openModal, setOpenModal] = useState({
+  // State
+  const [openModal, setOpenModal] = useState<ModalState>({
     create: false,
     edit: false,
     delete: false,
   });
-  const { admin: user } = useAppSelector((state) => state.user);
-  const { isLoading } = useAppSelector((state) => state.landingPage);
   const [activeOrgId, setActiveOrgId] = useState<string>("");
-  const { theme } = useAppSelector((state) => state.utils);
-  const { pathname } = useLocation();
-  let pageFromUrl = parseInt(pathname.split("/").pop() || "1", 10);
-  const [currentPage, setCurrentPage] = useState<number>(pageFromUrl);
-  const [meta, setMeta] = useState({ perPage: 16, total: 0 });
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [meta, setMeta] = useState<PageMeta>({ perPage: ITEMS_PER_PAGE, total: 0 });
   const [pages, setPages] = useState<IPages[]>([]);
   const [yesDelete, setYesDelete] = useState<boolean>(false);
-  const { edit: isEdit, create: isCreate, delete: isDelete } = openModal;
-  const pageDB = new IndexedDBCrud<IPageIndexedDB>(dbOptions);
   const [page, setPage] = useState<IPages>();
   const [pageData, setPageData] = useState<IPageIndexedDB[]>([]);
-  const getCardView = localStorage.getItem("cardView");
-  const [cardView, setCardView] = useState<boolean>(
-    getCardView !== null ? JSON.parse(getCardView) : true
-  );
-  const timeOfDay = getTimeOfDay();
+  const [cardView, setCardView] = useState<boolean>(() => {
+    const saved = localStorage.getItem("cardView");
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  // Hooks
+  const { admin: user } = useAppSelector((state) => state.user);
+  const { isLoading } = useAppSelector((state) => state.landingPage);
+  const { theme } = useAppSelector((state) => state.utils);
+  const { pathname } = useLocation();
   const navigate = useNavigate();
-  const totalPgs = Math.ceil(meta.total / meta.perPage);
-  const [hasOnePage, setHasOnePage] = useState(totalPgs <= 1);
-  const cacheKey = `pages-${currentPage}`;
-  const cacheMetaKey = `meta-${currentPage}`;
+  const pageDB = useMemo(() => new IndexedDBCrud<IPageIndexedDB>(dbOptions), []);
 
-  if (isNaN(pageFromUrl)) {
-    pageFromUrl = 1;
-    navigate("/pages/1");
-  }
+  // Derived state
+  const { edit: isEdit, create: isCreate, delete: isDelete } = openModal;
+  const timeOfDay = useMemo(() => getTimeOfDay(), []);
+  const totalPgs = useMemo(() => Math.ceil(meta.total / meta.perPage), [meta.total, meta.perPage]);
+  const hasOnePage = useMemo(() => totalPgs <= 1, [totalPgs]);
+  const cacheKey = useMemo(() => `${CACHE_PREFIX.PAGES}${currentPage}`, [currentPage]);
+  const cacheMetaKey = useMemo(() => `${CACHE_PREFIX.META}${currentPage}`, [currentPage]);
 
+  // Page metadata
   usePageMetadata({
     title: "Landing Pages",
     description: "Create and mange landing pages by simply drag and drop",
   });
 
-  useEffect(() => {
-    navigate(`/pages/${currentPage}`);
-  }, [currentPage, navigate]);
-
-  const handlePageChange = (newPage: number) => {
+  // Handlers
+  const handlePageChange = useCallback((newPage: number) => {
     setCurrentPage(newPage);
-  };
+    navigate(`/pages/${newPage}`);
+  }, [navigate]);
 
-  const toggleModal = (name: "create" | "delete" | "edit") => {
-    setOpenModal((prevState) => ({ ...prevState, [name]: !prevState[name] }));
-  };
+  const toggleModal = useCallback((name: keyof ModalState) => {
+    setOpenModal(prev => ({ ...prev, [name]: !prev[name] }));
+  }, []);
 
-  const handleOnEdit = (page: IPages) => {
+  const handleOnEdit = useCallback((page: IPages) => {
     setPage(page);
-    setOpenModal((prevState) => ({ ...prevState, edit: true }));
+    setOpenModal(prev => ({ ...prev, edit: true }));
     localStorage.setItem("initialized", "false");
     localStorage.setItem("pageName", page.pageName);
-  };
+  }, []);
 
-  const handleOnDelete = (page: IPages) => {
+  const handleOnDelete = useCallback((page: IPages) => {
     setPage(page);
     toggleModal("delete");
-  };
+  }, [toggleModal]);
 
-  const handleOnClose = () => {
-    setOpenModal((prevState) => ({ ...prevState, edit: false, create: false }));
-  };
+  const handleOnClose = useCallback(() => {
+    setOpenModal(prev => ({ ...prev, edit: false, create: false }));
+  }, []);
 
-  const content = (pageId: string, userId: string) => {
-    const page = pageData.find(
-      (item) => item.pageId === pageId && item.userId === userId
-    );
-
-    if (!page) return "";
-    const html = page.content?.html || "";
-    const css = page.content?.css || "";
-    const canvasData = page.canvasData;
-    const content = contentHTML({
-      html,
-      css,
-      canvasData,
-      hideScrollbar: true,
-      showScripts: true,
-      showXtraStyle: true,
-      hideLoader: true,
-    });
-
-    return content.trim();
-  };
-
-  const viewPage = async (pageId: string, userId: string) => {
-    const page = pageData.find(
-      (item) => item.pageId === pageId && item.userId === userId
-    );
-
+  const viewPage = useCallback(async (pageId: string, userId: string) => {
+    const page = pageData.find(item => item.pageId === pageId && item.userId === userId);
     if (!page) return;
 
-    const html = page.content?.html || "";
-    const css = page.content.css || "";
-    const canvasData = page.canvasData;
-    const newWindow = window.open("", "_blank");
+    const content = contentHTML({
+      html: page.content?.html || "",
+      css: page.content?.css || "",
+      showIcon: true,
+      showScripts: true,
+      showTailwindScript: true,
+      canvasData: page.canvasData,
+    });
 
+    const newWindow = window.open("", "_blank");
     if (newWindow) {
-      const content = contentHTML({
-        html,
-        css,
-        showIcon: true,
-        showScripts: true,
-        showTailwindScript: true,
-        canvasData,
-      });
       newWindow.document.write(content);
       newWindow.document.close();
     } else {
       alert("Popup blocked! Please allow popups for this page!");
     }
-  };
+  }, [pageData]);
 
-  const fetchPages = async () => {
+  // Data fetching
+  const fetchPages = useCallback(async () => {
     const cachedData = sessionStorage.getItem(cacheKey);
     const cachedMetaData = sessionStorage.getItem(cacheMetaKey);
 
     if (cachedData && cachedMetaData) {
-      const parsedData = JSON.parse(cachedData);
-      const parsedMetaData = JSON.parse(cachedMetaData);
-
-      setPages(parsedData);
-      setMeta({
-        perPage: parsedMetaData.per_page,
-        total: parsedMetaData.total,
-      });
+      setPages(JSON.parse(cachedData));
+      setMeta(JSON.parse(cachedMetaData));
       return;
     }
 
@@ -172,65 +232,56 @@ const LandingPages = () => {
         updatedDate: page.attributes.updatedDate,
       }));
 
-      // Store fresh response in sessionStorage
       sessionStorage.setItem(cacheKey, JSON.stringify(transformedPages));
       sessionStorage.setItem(cacheMetaKey, JSON.stringify(resp.meta));
 
       setPages(transformedPages);
       setMeta({ perPage: resp.meta.per_page, total: resp.meta.total });
     } catch (error) {
-      console.log("error =>", error);
+      console.error("Error fetching pages:", error);
     }
-  };
+  }, [currentPage, cacheKey, cacheMetaKey]);
+
+  // Effects
+  useEffect(() => {
+    const pageFromUrl = parseInt(pathname.split("/").pop() || "1", 10);
+    if (isNaN(pageFromUrl)) {
+      navigate("/pages/1");
+    } else {
+      setCurrentPage(pageFromUrl);
+    }
+  }, [pathname, navigate]);
 
   useEffect(() => {
     fetchPages();
-  }, [currentPage]);
-
-  // This logic control the main div style height
-  useEffect(() => {
-    const totalPgs = Math.ceil(meta.total / meta.perPage);
-    setHasOnePage(totalPgs <= 1);
-  }, [meta.total, meta.perPage]);
+  }, [fetchPages]);
 
   useEffect(() => {
     if (yesDelete) {
       fetchPages();
-
-      // Check if we deleted the last item on the current page
       if (meta.total % meta.perPage === 1 && currentPage > 1) {
-        setCurrentPage((prev) => prev - 1);
+        setCurrentPage(prev => prev - 1);
       }
-
       setYesDelete(false);
     }
-  }, [yesDelete, meta.total]);
+  }, [yesDelete, meta.total, meta.perPage, currentPage, fetchPages]);
 
   useEffect(() => {
     const getPages = async () => {
       const pageData = await pageDB.getAll();
       setPageData(pageData);
     };
-
     getPages();
+  }, [pageDB]);
 
+  useEffect(() => {
     localStorage.setItem("cardView", JSON.stringify(cardView));
   }, [cardView]);
 
-  // Clear Cache and Fetch Data Afresh
   useEffect(() => {
-    // If sessionStorage is empty, re-fetch Pages and Meta
-    if (
-      !sessionStorage.getItem(cacheKey) &&
-      !sessionStorage.getItem(cacheMetaKey)
-    ) {
-      fetchPages();
-    }
-
     const handleRefresh = () => {
-      // Loop through sessionStorage and remove keys that start with "pages-" or "meta-"
-      Object.keys(sessionStorage).forEach((key) => {
-        if (key.startsWith("pages-") || key.startsWith("meta-")) {
+      Object.keys(sessionStorage).forEach(key => {
+        if (key.startsWith(CACHE_PREFIX.PAGES) || key.startsWith(CACHE_PREFIX.META)) {
           sessionStorage.removeItem(key);
         }
       });
@@ -238,7 +289,7 @@ const LandingPages = () => {
 
     window.addEventListener("beforeunload", handleRefresh);
     return () => window.removeEventListener("beforeunload", handleRefresh);
-  }, [location.pathname, currentPage]);
+  }, []);
 
   return (
     <div className="LandingPage" data-theme={theme}>
@@ -246,7 +297,7 @@ const LandingPages = () => {
         <div className="overlay" onClick={() => setActiveOrgId("")} />
       )}
 
-      {<DesignWebsiteOptions />}
+      <DesignWebsiteOptions />
 
       {isCreate || isEdit ? (
         <CreateLandingPage
@@ -295,12 +346,12 @@ const LandingPages = () => {
               {cardView ? (
                 <IoGridOutline
                   fontSize={24}
-                  onClick={() => setCardView((prevState) => !prevState)}
+                  onClick={() => setCardView(prev => !prev)}
                 />
               ) : (
                 <FaListOl
                   fontSize={24}
-                  onClick={() => setCardView((prevState) => !prevState)}
+                  onClick={() => setCardView(prev => !prev)}
                 />
               )}
             </span>
@@ -311,104 +362,27 @@ const LandingPages = () => {
 
         {cardView ? (
           <ul className="gridContainer">
-            {pages && pages.length === 0 && !isLoading ? (
+            {pages.length === 0 && !isLoading ? (
               <h3 className="empty-text">No page created yet!</h3>
             ) : (
-              pages?.map((data, idx) => (
-                <li className="gridItem" key={idx}>
-                  <div className="imgContainer">
-                    <img
-                      src={
-                        data.screenshot
-                          ? data?.screenshot?.src
-                          : LandscapePlaceholder
-                      }
-                      alt={data.pageName}
-                    />
-
-                    <div className="btnContainer">
-                      <button
-                        className="btnView"
-                        onClick={() => viewPage(data.pageId, data.userId)}
-                      >
-                        View
-                      </button>
-                      <button
-                        className="btnView"
-                        onClick={() => handleOnEdit(data)}
-                      >
-                        Edit
-                      </button>
-                      <button className="btnEdit">Publish</button>
-                      <button
-                        className="btnEdit"
-                        onClick={() => handleOnDelete(data)}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                  <h4>{truncateText(data.pageName, 28)}</h4>
-                  <p>Opened {formatDate(data.updatedDate)}</p>
-                </li>
+              pages.map(data => (
+                <PageCard
+                  key={data.pageId}
+                  data={data}
+                  onView={viewPage}
+                  onEdit={handleOnEdit}
+                  onDelete={handleOnDelete}
+                />
               ))
             )}
           </ul>
         ) : (
-          <div className="table-container">
-            {pages && pages.length === 0 && !isLoading ? (
-              <h3 className="empty-text">No page created yet!</h3>
-            ) : (
-              <table>
-                <thead>
-                  <tr>
-                    <th>S/N</th>
-                    <th>Page Name</th>
-                    <th>Created Date</th>
-                    <th>Updated Date</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pages.map((data, index) => (
-                    <tr key={index}>
-                      <td>{index + 1}</td>
-                      <td>{data.pageName}</td>
-                      <td>{formatDate(data.createdDate)}</td>
-                      <td>{formatDate(data.updatedDate)}</td>
-                      <td className="action-buttons">
-                        <button
-                          className="view-btn"
-                          onClick={() => viewPage(data.pageId, data.userId)}
-                        >
-                          <HiOutlineEye />{" "}
-                          <span className="btn-text">View</span>
-                        </button>
-                        <button
-                          className="edit-btn"
-                          onClick={() => handleOnEdit(data)}
-                        >
-                          <MdOutlineEdit />{" "}
-                          <span className="btn-text">Edit</span>
-                        </button>
-                        <button className="edit-btn">
-                          <MdPublishedWithChanges />{" "}
-                          <span className="btn-text">Publish</span>
-                        </button>
-                        <button
-                          className="delete-btn"
-                          onClick={() => handleOnDelete(data)}
-                        >
-                          <FaTrashAlt />{" "}
-                          <span className="btn-text">Delete</span>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
+          <PageTable
+            pages={pages}
+            onView={viewPage}
+            onEdit={handleOnEdit}
+            onDelete={handleOnDelete}
+          />
         )}
       </div>
 
