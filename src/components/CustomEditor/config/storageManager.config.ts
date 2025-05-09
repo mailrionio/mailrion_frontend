@@ -57,7 +57,7 @@ export const storageManager = (
         formData.append("email_builder", JSON.stringify(emailBuilder));
         formData.append("screenshot", screenshot, "screenshot.png");
 
-        for (let [key, value] of formData.entries()) {
+        /* for (let [key, value] of formData.entries()) {
           console.log(`CANVASDATA ==> ${emailBuilder.canvasData}`);
           console.log(`CONTENT ==> ${emailBuilder.content}`);
         }
@@ -71,7 +71,7 @@ export const storageManager = (
         });
 
         const data = await response.json();
-        console.log("UPLOADED SUCCESSFULLY ===> ", data);
+        console.log("UPLOADED SUCCESSFULLY ===> ", data); */
 
         const resp = await UpdateCampaignAPI(formData, orgId, campaignId);
 
